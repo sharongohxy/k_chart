@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:k_chart/chart_translations.dart';
 import 'package:k_chart/extension/map_ext.dart';
 import 'package:k_chart/flutter_k_chart.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 enum MainState { MA, BOLL, NONE }
 
@@ -56,6 +57,8 @@ class KChartWidget extends StatefulWidget {
   final bool isTrendLine;
   final double xFrontPadding;
 
+  final bool isBusy;
+
   KChartWidget(
     this.datas,
     this.chartStyle,
@@ -63,7 +66,7 @@ class KChartWidget extends StatefulWidget {
     required this.isTrendLine,
     this.xFrontPadding = 100,
     this.mainState = MainState.MA,
-    this.secondaryState = SecondaryState.MACD,
+    this.secondaryState = SecondaryState.NONE,
     this.onSecondaryTap,
     this.volHidden = false,
     this.isLine = false,
@@ -83,6 +86,7 @@ class KChartWidget extends StatefulWidget {
     this.flingCurve = Curves.decelerate,
     this.isOnDrag,
     this.verticalTextAlignment = VerticalTextAlignment.left,
+    @required this.isBusy = true,
   });
 
   @override
@@ -136,6 +140,17 @@ class _KChartWidgetState extends State<KChartWidget>
       mScrollX = mSelectX = 0.0;
       mScaleX = 1.0;
     }
+    if (widget.isBusy) {
+      return Center(
+        child: Container(
+          height: 30,
+          child: SpinKitThreeBounce(
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      );
+    }
     final _painter = ChartPainter(
       widget.chartStyle,
       widget.chartColors,
@@ -164,7 +179,7 @@ class _KChartWidgetState extends State<KChartWidget>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        mHeight = constraints.maxHeight;
+        mHeight = constraints.maxHeight - 100;
         mWidth = constraints.maxWidth;
 
         return GestureDetector(

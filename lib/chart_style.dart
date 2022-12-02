@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' show Color;
 
 class ChartColors {
-  List<Color> bgColor = [Color(0xff18191d), Color(0xff18191d)];
+  List<Color> bgColor = [Color(0x00000000), Color(0x00000000)];
 
   Color kLineColor = Color(0xff4C86CD);
   Color lineFillColor = Color(0x554C86CD);
@@ -11,7 +11,9 @@ class ChartColors {
   Color ma30Color = Color(0xff9979C6);
   Color upColor = Color(0xff4DAA90);
   Color dnColor = Color(0xffC15466);
+  Color volBarColor = Color(0x1f000000);
   Color volColor = Color(0xff4729AE);
+  Color volBgColor = Color(0xffEEEEEE);
 
   Color macdColor = Color(0xff4729AE);
   Color difColor = Color(0xffC9B885);
@@ -22,21 +24,23 @@ class ChartColors {
   Color jColor = Color(0xff9979C6);
   Color rsiColor = Color(0xffC9B885);
 
-  Color defaultTextColor = Color(0xff60738E);
+  Color defaultTextColor = Color(0xff000000);
+  Color black = Color(0xff000000);
 
   Color nowPriceUpColor = Color(0xff4DAA90);
   Color nowPriceDnColor = Color(0xffC15466);
   Color nowPriceTextColor = Color(0xffffffff);
+  Color nowPriceBgColor = Color(0xffbdbdbd);
 
   //深度颜色
   Color depthBuyColor = Color(0xff60A893);
   Color depthSellColor = Color(0xffC15866);
 
   //选中后显示值边框颜色
-  Color selectBorderColor = Color(0xff6C7A86);
+  Color selectBorderColor = Color(0xFF303030);
 
   //选中后显示值背景的填充颜色
-  Color selectFillColor = Color(0xff0D1722);
+  Color selectFillColor = Color(0xFF303030);
 
   //分割线颜色
   Color gridColor = Color(0xff4c5c74);
@@ -46,8 +50,8 @@ class ChartColors {
   Color infoWindowUpColor = Color(0xff00ff00);
   Color infoWindowDnColor = Color(0xffff0000);
 
-  Color hCrossColor = Color(0xffffffff);
-  Color vCrossColor = Color(0x1Effffff);
+  Color hCrossColor = Color(0x00000000);
+  Color vCrossColor = Color(0x00000000);
   Color crossTextColor = Color(0xffffffff);
 
   //当前显示内最大和最小值的颜色

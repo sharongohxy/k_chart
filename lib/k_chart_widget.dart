@@ -41,6 +41,7 @@ class KChartWidget extends StatefulWidget {
   final bool materialInfoDialog; // Material风格的信息弹窗
   final Map<String, ChartTranslations> translations;
   final List<String> timeFormat;
+  final List yesterdayLastPriceList;
 
   //当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
   final Function(bool)? onLoadMore;
@@ -86,7 +87,8 @@ class KChartWidget extends StatefulWidget {
     this.flingCurve = Curves.decelerate,
     this.isOnDrag,
     this.verticalTextAlignment = VerticalTextAlignment.left,
-    @required this.isBusy = true,
+    this.isBusy = true,
+    required this.yesterdayLastPriceList,
   });
 
   @override
@@ -175,6 +177,7 @@ class _KChartWidgetState extends State<KChartWidget>
       fixedLength: widget.fixedLength,
       maDayList: widget.maDayList,
       verticalTextAlignment: widget.verticalTextAlignment,
+      yesterdayLastPriceList: widget.yesterdayLastPriceList,
     );
 
     return LayoutBuilder(
@@ -183,6 +186,9 @@ class _KChartWidgetState extends State<KChartWidget>
         mWidth = constraints.maxWidth;
 
         return GestureDetector(
+          onTap: () {
+            isLongPress = false;
+          },
           onTapUp: (details) {
             if (!widget.isTrendLine &&
                 widget.onSecondaryTap != null &&
@@ -250,9 +256,9 @@ class _KChartWidgetState extends State<KChartWidget>
             isOnTap = false;
             isLongPress = true;
             if ((mSelectX != details.localPosition.dx ||
-                    mSelectY != details.globalPosition.dy) &&
-                !widget.isTrendLine) {
+                mSelectY != details.globalPosition.dy)) {
               mSelectX = details.localPosition.dx;
+              mSelectY = details.localPosition.dy;
               notifyChanged();
             }
             //For TrendLine
@@ -270,24 +276,23 @@ class _KChartWidgetState extends State<KChartWidget>
           },
           onLongPressMoveUpdate: (details) {
             if ((mSelectX != details.localPosition.dx ||
-                    mSelectY != details.globalPosition.dy) &&
-                !widget.isTrendLine) {
+                mSelectY != details.globalPosition.dy)) {
               mSelectX = details.localPosition.dx;
               mSelectY = details.localPosition.dy;
               notifyChanged();
             }
-            if (widget.isTrendLine) {
-              mSelectX =
-                  mSelectX + (details.localPosition.dx - changeinXposition!);
-              changeinXposition = details.localPosition.dx;
-              mSelectY =
-                  mSelectY + (details.globalPosition.dy - changeinYposition!);
-              changeinYposition = details.globalPosition.dy;
-              notifyChanged();
-            }
+            // if (widget.isTrendLine) {
+            //   mSelectX =
+            //       mSelectX + (details.localPosition.dx - changeinXposition!);
+            //   changeinXposition = details.localPosition.dx;
+            //   mSelectY =
+            //       mSelectY + (details.globalPosition.dy - changeinYposition!);
+            //   changeinYposition = details.globalPosition.dy;
+            //   notifyChanged();
+            // }
           },
           onLongPressEnd: (details) {
-            isLongPress = false;
+            // isLongPress = false;
             enableCordRecord = true;
             mInfoWindowStream?.sink.add(null);
             notifyChanged();

@@ -48,6 +48,7 @@ class ChartPainter extends BaseChartPainter {
   final bool hideGrid;
   final bool showNowPrice;
   final VerticalTextAlignment verticalTextAlignment;
+  final List yesterdayLastPriceList;
 
   ChartPainter(
     this.chartStyle,
@@ -73,6 +74,7 @@ class ChartPainter extends BaseChartPainter {
     this.showNowPrice = true,
     this.fixedLength = 4,
     this.maDayList = const [5, 10, 20],
+    required this.yesterdayLastPriceList,
   }) : super(chartStyle,
             datas: datas,
             scaleX: scaleX,
@@ -118,6 +120,8 @@ class ChartPainter extends BaseChartPainter {
       this.chartColors,
       this.scaleX,
       verticalTextAlignment,
+      yesterdayLastPriceList,
+      datas,
       maDayList,
     );
     if (mVolRect != null) {
@@ -172,7 +176,7 @@ class ChartPainter extends BaseChartPainter {
   @override
   void drawGrid(canvas) {
     if (!hideGrid) {
-      mMainRenderer.drawGrid(canvas, mGridRows, mGridColumns);
+      // mMainRenderer.drawGrid(canvas, mGridRows, mGridColumns);
       mVolRenderer?.drawGrid(canvas, mGridRows, mGridColumns);
       // mSecondaryRenderer?.drawGrid(canvas, mGridRows, mGridColumns);
     }
@@ -196,16 +200,20 @@ class ChartPainter extends BaseChartPainter {
       //     lastPoint, curPoint, lastX, curX, size, canvas);
     }
 
-    if ((isLongPress == true || (isTapShowInfoDialog && isOnTap)) &&
-        isTrendLine == false) {
+    if ((isLongPress == true || (isTapShowInfoDialog && isOnTap))) {
       drawCrossLine(canvas, size);
     }
-    if (isTrendLine == true) drawTrendLines(canvas, size);
+    // if (isTrendLine == true) drawTrendLines(canvas, size);
     canvas.restore();
   }
 
   @override
-  void drawVerticalText(canvas) {
+  void drawVerticalText(Canvas canvas, Size size) {
+    Paint verticalBg = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 1
+      ..isAntiAlias = true;
+    canvas.drawRect(Rect.fromLTRB(250, 0, size.width, size.height), verticalBg);
     var textStyle = getTextStyle(this.chartColors.defaultTextColor);
     mMainRenderer.drawVerticalText(canvas, textStyle, mGridRows);
     mVolRenderer?.drawVerticalText(canvas, textStyle, mGridRows);
@@ -254,8 +262,26 @@ class ChartPainter extends BaseChartPainter {
   void drawCrossLineText(Canvas canvas, Size size) {
     var index = calculateSelectedX(selectX);
     KLineEntity point = getItem(index);
+    TextSpan span = TextSpan(children: [
+      TextSpan(
+          text: "Price: ${point.close.toStringAsFixed(4)}  ",
+          style: getTextStyle(this.chartColors.legendTextColor, fontSize: 12)),
+      TextSpan(
+          text:
+              "Volume: ${formatAmountWithCommas(point.vol.toStringAsFixed(0))}",
+          style: getTextStyle(this.chartColors.legendTextColor, fontSize: 12)),
+    ]);
 
-    TextPainter tp = getTextPainter(point.close, chartColors.crossTextColor);
+    TextPainter legendTp =
+        TextPainter(text: span, textDirection: TextDirection.ltr);
+    legendTp.layout();
+    legendTp.paint(canvas, Offset(0, 0));
+
+    double currentPrice = mMainMinValue +
+        (mMainMaxValue - mMainMinValue) * (size.height - 0.16) / size.height;
+
+    TextPainter tp = getTextPainter(
+        currentPrice.toStringAsFixed(4), chartColors.crossTextColor);
     double textHeight = tp.height;
     double textWidth = tp.width;
     double offsetX = mWidth - tp.width;
@@ -356,7 +382,7 @@ class ChartPainter extends BaseChartPainter {
       return;
     }
 
-    double value = datas!.elementAt(datas!.length - 2).close;
+    double value = yesterdayLastPriceList.last.value;
     double y = getMainY(value);
 
     //视图展示区域边界值绘制
@@ -370,18 +396,18 @@ class ChartPainter extends BaseChartPainter {
 
     nowPricePaint..color = this.chartColors.nowPriceBgColor;
     //先画横线
+
+    //再画背景和文本
+    TextPainter tp = getTextPainter(
+        value.toStringAsFixed(fixedLength), this.chartColors.black);
     double startX = 0;
-    final max = mWidth - 45;
+    final max = mWidth - tp.width;
     final space = 2;
     while (startX < max) {
       canvas.drawLine(
           Offset(startX, y), Offset(startX + space, y), nowPricePaint);
       startX += space + space;
     }
-    //再画背景和文本
-    TextPainter tp = getTextPainter(
-        value.toStringAsFixed(fixedLength), this.chartColors.black);
-
     double offsetX;
     switch (verticalTextAlignment) {
       case VerticalTextAlignment.left:
@@ -426,18 +452,18 @@ class ChartPainter extends BaseChartPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(Offset(-mTranslateX, y),
-        Offset(-mTranslateX + mWidth / scaleX, y), paintX);
-    if (scaleX >= 1) {
-      canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 15.0 * scaleX, width: 15.0),
-          paint);
-    } else {
-      canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 10.0, width: 10.0 / scaleX),
-          paint);
-    }
+        Offset(-mTranslateX + mWidth / scaleX, y), paintY);
+    // if (scaleX >= 1) {
+    //   canvas.drawOval(
+    //       Rect.fromCenter(
+    //           center: Offset(x, y), height: 15.0 * scaleX, width: 15.0),
+    //       paint);
+    // } else {
+    //   canvas.drawOval(
+    //       Rect.fromCenter(
+    //           center: Offset(x, y), height: 10.0, width: 10.0 / scaleX),
+    //       paint);
+    // }
     if (lines.length >= 1) {
       lines.forEach((element) {
         var y1 = -((element.p1.dy - 35) / element.scale) + element.maxHeight;
@@ -446,12 +472,12 @@ class ChartPainter extends BaseChartPainter {
         var b = (trendLineMax! - y2) * trendLineScale! + trendLineContentRec!;
         var p1 = Offset(element.p1.dx, a);
         var p2 = Offset(element.p2.dx, b);
-        canvas.drawLine(
-            p1,
-            element.p2 == Offset(-1, -1) ? Offset(x, y) : p2,
-            Paint()
-              ..color = Colors.yellow
-              ..strokeWidth = 2);
+        // canvas.drawLine(
+        //     p1,
+        //     element.p2 == Offset(-1, -1) ? Offset(x, y) : p2,
+        //     Paint()
+        //       ..color = Colors.yellow
+        //       ..strokeWidth = 2);
       });
     }
   }
@@ -460,35 +486,72 @@ class ChartPainter extends BaseChartPainter {
   void drawCrossLine(Canvas canvas, Size size) {
     var index = calculateSelectedX(selectX);
     KLineEntity point = getItem(index);
-    Paint paintY = Paint()
-          ..color = this.chartColors.black
-          ..strokeWidth = this.chartStyle.vCrossWidth
-        // ..isAntiAlias = true
-        ;
-    double x = getX(index);
-    double y = getMainY(point.close);
-    // k线图竖线
-    canvas.drawLine(Offset(x, mTopPadding),
-        Offset(x, size.height - mBottomPadding), paintY);
-
-    Paint paintX = Paint()
+    Paint dotClosePriceBg = Paint()
+      ..color = this.chartColors.nowPriceBgColor
+      ..strokeWidth = 1
+      ..isAntiAlias = true;
+    Paint dotBg = Paint()
+      ..color = this.chartColors.white
+      ..strokeWidth = 1
+      ..isAntiAlias = true;
+    Paint paintLine = Paint()
       ..color = this.chartColors.black
       ..strokeWidth = this.chartStyle.hCrossWidth
       ..isAntiAlias = true;
-    // k线图横线
-    canvas.drawLine(Offset(-mTranslateX, y),
-        Offset(-mTranslateX + mWidth / scaleX, y), paintX);
-    if (scaleX >= 1) {
-      canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 2.0 * scaleX, width: 2.0),
-          paintX);
-    } else {
-      canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 2.0, width: 2.0 / scaleX),
-          paintX);
+    double x = getX(index);
+    double y = getMainY(point.close);
+    double yClose = getMainY(yesterdayLastPriceList.last.value);
+    // k线图竖线
+
+    double dashHeight = 7, dashWidth = 7, dashSpace = 6;
+    double startY = 20;
+    while (startY < size.height - 20) {
+      canvas.drawLine(
+          Offset(x, startY), Offset(x, startY + dashHeight), paintLine);
+      startY += dashHeight + dashSpace;
     }
+    // k线图横线
+    double startX = -mTranslateX;
+    print(startX);
+    print(startX + mWidth / scaleX);
+    // final max = -mTranslateX;
+    // final space = 3;
+    // while (startX < max) {
+    //   canvas.drawLine(
+    //       Offset(startX, y), Offset(startX + space, y), nowPricePaint);
+    //   startX += space + space;
+    // }
+    // while (startX < max) {
+    //   canvas.drawLine(Offset(startX, y), Offset(startX + space, y), paintX);
+    //   startX += 10;
+    // }
+    while (startX < mWidth * 2) {
+      canvas.drawLine(
+          Offset(startX, y), Offset(startX + dashWidth, y), paintLine);
+      startX += dashWidth + dashSpace;
+    }
+    // canvas.drawLine(
+    //     Offset(startX, y), Offset(startX + mWidth / scaleX, y), paintX);
+
+    Paint paintDotBuySell = Paint()
+      ..color = this.chartColors.depthBuyColor
+      ..strokeWidth = 1
+      ..isAntiAlias = true;
+    canvas.drawCircle(Offset(x, yClose), 5.5, dotBg);
+    canvas.drawCircle(Offset(x, yClose), 4, dotClosePriceBg);
+    canvas.drawCircle(Offset(x, y), 5.5, dotBg);
+    canvas.drawCircle(Offset(x, y), 4, paintDotBuySell);
+    // if (scaleX >= 1) {
+    //   // canvas.drawOval(
+    //   //     Rect.fromCenter(
+    //   //         center: Offset(x, y), height: 2.0 * scaleX, width: 2.0),
+    //   //     paintX);
+    // } else {
+    //   canvas.drawOval(
+    //       Rect.fromCenter(
+    //           center: Offset(x, y), height: 2.0, width: 2.0 / scaleX),
+    //       paintX);
+    // }
   }
 
   TextPainter getTextPainter(text, color) {
@@ -499,6 +562,23 @@ class ChartPainter extends BaseChartPainter {
     TextPainter tp = TextPainter(text: span, textDirection: TextDirection.ltr);
     tp.layout();
     return tp;
+  }
+
+  String formatAmountWithCommas(String num) {
+    String numInText = "";
+    int counter = 0;
+    for (int i = (num.length - 1); i >= 0; i--) {
+      counter++;
+      String str = num[i];
+      if ((counter % 3) != 0 && i != 0) {
+        numInText = "$str$numInText";
+      } else if (i == 0) {
+        numInText = "$str$numInText";
+      } else {
+        numInText = ",$str$numInText";
+      }
+    }
+    return numInText.trim();
   }
 
   String getDate(int? date) => dateFormat(

@@ -25,7 +25,9 @@ class ChartColors {
   Color rsiColor = Color(0xffC9B885);
 
   Color defaultTextColor = Color(0xff000000);
+  Color legendTextColor = Color(0x8A000000);
   Color black = Color(0xff000000);
+  Color white = Color(0xffffffff);
 
   Color nowPriceUpColor = Color(0xff4DAA90);
   Color nowPriceDnColor = Color(0xffC15466);
@@ -35,6 +37,7 @@ class ChartColors {
   //深度颜色
   Color depthBuyColor = Color(0xff60A893);
   Color depthSellColor = Color(0xffC15866);
+  Color depthRemainColor = Color(0xff9E9E9E);
 
   //选中后显示值边框颜色
   Color selectBorderColor = Color(0xFF303030);

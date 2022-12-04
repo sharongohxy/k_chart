@@ -114,7 +114,7 @@ abstract class BaseChartPainter extends CustomPainter {
     drawGrid(canvas);
     if (datas != null && datas!.isNotEmpty) {
       drawChart(canvas, size);
-      drawVerticalText(canvas);
+      drawVerticalText(canvas, size);
       drawDate(canvas, size);
 
       drawText(canvas, datas!.last, 5);
@@ -140,7 +140,7 @@ abstract class BaseChartPainter extends CustomPainter {
   void drawChart(Canvas canvas, Size size);
 
   //画右边值
-  void drawVerticalText(canvas);
+  void drawVerticalText(Canvas canvas, Size size);
 
   //画时间
   void drawDate(Canvas canvas, Size size);
@@ -356,8 +356,8 @@ abstract class BaseChartPainter extends CustomPainter {
   double translateXtoX(double translateX) =>
       (translateX + mTranslateX) * scaleX;
 
-  TextStyle getTextStyle(Color color) {
-    return TextStyle(fontSize: 10.0, color: color);
+  TextStyle getTextStyle(Color color, {double fontSize = 10.0}) {
+    return TextStyle(fontSize: fontSize, color: color);
   }
 
   @override

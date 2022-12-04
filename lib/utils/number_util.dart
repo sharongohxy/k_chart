@@ -12,7 +12,7 @@ class NumberUtil {
       n /= 1000;
       return "${n.toStringAsFixed(2)}K";
     } else {
-      return n.toStringAsFixed(4);
+      return n.toStringAsFixed(0);
     }
   }
 

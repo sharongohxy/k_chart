@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:k_chart/entity/k_line_entity.dart';
 
 import '../entity/candle_entity.dart';
 import '../k_chart_widget.dart' show MainState;
@@ -22,10 +23,12 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   List<int> maDayList;
   final ChartStyle chartStyle;
   final ChartColors chartColors;
-  final double mLineStrokeWidth = 1.0;
+  final double mLineStrokeWidth = 5.0;
   double scaleX;
   late Paint mLinePaint;
   final VerticalTextAlignment verticalTextAlignment;
+  final List yesterdayLastPriceList;
+  final List<KLineEntity>? datas;
 
   MainRenderer(
       Rect mainRect,
@@ -39,6 +42,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       this.chartColors,
       this.scaleX,
       this.verticalTextAlignment,
+      this.yesterdayLastPriceList,
+      this.datas,
       [this.maDayList = const [5, 10, 20]])
       : super(
             chartRect: mainRect,
@@ -53,7 +58,11 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       ..isAntiAlias = true
       ..style = PaintingStyle.stroke
       ..strokeWidth = mLineStrokeWidth
-      ..color = this.chartColors.kLineColor;
+      ..color = (datas?.length != 0)
+          ? getKLineColor(
+              (datas!.last.close - yesterdayLastPriceList.last?.value))
+          : this.chartColors.depthRemainColor;
+    // ..color = this.chartColors.kLineColor;
     _contentRect = Rect.fromLTRB(
         chartRect.left,
         chartRect.top + _contentPadding,
@@ -64,6 +73,15 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       minValue /= 2;
     }
     scaleY = _contentRect.height / (maxValue - minValue);
+  }
+
+  Color getKLineColor(num priceDifference) {
+    if (priceDifference == 0)
+      return chartColors.depthRemainColor;
+    else if (priceDifference.isNegative)
+      return chartColors.depthSellColor;
+    else if (!(priceDifference.isNegative)) return chartColors.depthBuyColor;
+    return chartColors.depthRemainColor;
   }
 
   @override
@@ -155,7 +173,10 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       tileMode: TileMode.clamp,
-      colors: [this.chartColors.lineFillColor, this.chartColors.lineFillInsideColor],
+      colors: [
+        this.chartColors.lineFillColor,
+        this.chartColors.lineFillInsideColor
+      ],
     ).createShader(Rect.fromLTRB(
         chartRect.left, chartRect.top, chartRect.right, chartRect.bottom));
     mLineFillPaint..shader = mLineFillShader;

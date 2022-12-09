@@ -187,15 +187,18 @@ class ChartPainter extends BaseChartPainter {
     canvas.save();
     canvas.translate(mTranslateX * scaleX, 0.0);
     canvas.scale(scaleX, 1.0);
+    double value = yesterdayLastPriceList.last.value;
     for (int i = mStartIndex; datas != null && i <= mStopIndex; i++) {
       KLineEntity? curPoint = datas?[i];
       if (curPoint == null) continue;
       KLineEntity lastPoint = i == 0 ? curPoint : datas![i - 1];
       double curX = getX(i);
       double lastX = i == 0 ? curX : getX(i - 1);
-
-      mMainRenderer.drawChart(lastPoint, curPoint, lastX, curX, size, canvas);
-      mVolRenderer?.drawChart(lastPoint, curPoint, lastX, curX, size, canvas);
+      double middleX = (getX(i) + getX(i + 1)) / 2;
+      mMainRenderer.drawChart(
+          lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
+      mVolRenderer?.drawChart(
+          lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
       // mSecondaryRenderer?.drawChart(
       //     lastPoint, curPoint, lastX, curX, size, canvas);
     }
@@ -511,9 +514,12 @@ class ChartPainter extends BaseChartPainter {
       startY += dashHeight + dashSpace;
     }
     // k线图横线
-    double startX = -mTranslateX;
-    print(startX);
-    print(startX + mWidth / scaleX);
+    double start = -mTranslateX;
+    final max = mWidth - 50;
+    final dspace = 5;
+    // double startX = -mTranslateX;
+    // print(startX);
+    // print(startX + mWidth / scaleX);
     // final max = -mTranslateX;
     // final space = 3;
     // while (startX < max) {
@@ -525,10 +531,10 @@ class ChartPainter extends BaseChartPainter {
     //   canvas.drawLine(Offset(startX, y), Offset(startX + space, y), paintX);
     //   startX += 10;
     // }
-    while (startX < mWidth * 2) {
+    while (start < max) {
       canvas.drawLine(
-          Offset(startX, y), Offset(startX + dashWidth, y), paintLine);
-      startX += dashWidth + dashSpace;
+          Offset(start, y), Offset(start + dashWidth, y), paintLine);
+      start += dashWidth + dashSpace;
     }
     // canvas.drawLine(
     //     Offset(startX, y), Offset(startX + mWidth / scaleX, y), paintX);

@@ -6,6 +6,7 @@ import '../k_chart_widget.dart' show MainState;
 import 'base_chart_renderer.dart';
 
 enum VerticalTextAlignment { left, right }
+
 //For TrendLine
 double? trendLineMax;
 double? trendLineScale;
@@ -23,7 +24,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   List<int> maDayList;
   final ChartStyle chartStyle;
   final ChartColors chartColors;
-  final double mLineStrokeWidth = 5.0;
+  final double mLineStrokeWidth = 2.0;
   double scaleX;
   late Paint mLinePaint;
   final VerticalTextAlignment verticalTextAlignment;
@@ -73,6 +74,12 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       minValue /= 2;
     }
     scaleY = _contentRect.height / (maxValue - minValue);
+  }
+
+  createNewChartPoints() {
+    if (datas == [])
+      return;
+    else {}
   }
 
   Color getKLineColor(num priceDifference) {
@@ -130,10 +137,18 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   }
 
   @override
-  void drawChart(CandleEntity lastPoint, CandleEntity curPoint, double lastX,
-      double curX, Size size, Canvas canvas) {
+  void drawChart(
+      CandleEntity lastPoint,
+      CandleEntity curPoint,
+      double lastX,
+      double curX,
+      double middleX,
+      double? ytdClosePrice,
+      Size size,
+      Canvas canvas) {
     if (isLine) {
-      drawPolyline(lastPoint.close, curPoint.close, canvas, lastX, curX);
+      drawPolyline(lastPoint.close, curPoint.close, canvas, lastX, curX,
+          middleX, ytdClosePrice);
     } else {
       drawCandle(curPoint, canvas, curX);
       if (state == MainState.MA) {
@@ -145,16 +160,18 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   }
 
   Shader? mLineFillShader;
-  Path? mLinePath, mLineFillPath;
+  Path? mLinePath, mLineFillPath, mGreenPartLinePath, mRedPartLinePath;
   Paint mLineFillPaint = Paint()
     ..style = PaintingStyle.fill
     ..isAntiAlias = true;
 
   //画折线图
   drawPolyline(double lastPrice, double curPrice, Canvas canvas, double lastX,
-      double curX) {
+      double curX, double middleX, double? ytdClosePrice) {
 //    drawLine(lastPrice + 100, curPrice + 100, canvas, lastX, curX, ChartColors.kLineColor);
-    mLinePath ??= Path();
+    mLinePath = Path();
+    mGreenPartLinePath = Path();
+    mRedPartLinePath = Path();
 
 //    if (lastX == curX) {
 //      mLinePath.moveTo(lastX, getY(lastPrice));
@@ -165,18 +182,39 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
 //    }
     if (lastX == curX) lastX = 0; //起点位置填充
     mLinePath!.moveTo(lastX, getY(lastPrice));
-    mLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice), (lastX + curX) / 2,
-        getY(curPrice), curX, getY(curPrice));
+    // mRedPartLinePath!.moveTo(curX, getY(lastPrice));
+    // mGreenPartLinePath!.moveTo(lastX, getY(lastPrice));
+    if (ytdClosePrice != null) {
+      if (curPrice < ytdClosePrice && lastPrice > ytdClosePrice) {
+        print('true here');
+        mRedPartLinePath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mGreenPartLinePath!.moveTo(lastX, getY(lastPrice));
+
+        mRedPartLinePath!.cubicTo((lastX + curX) / 2, getY(ytdClosePrice),
+            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+        mGreenPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
+            (lastX + curX) / 2, getY(ytdClosePrice), curX, getY(ytdClosePrice));
+      } else if (curPrice > ytdClosePrice && lastPrice < ytdClosePrice) {
+        mGreenPartLinePath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mRedPartLinePath!.moveTo(lastX, getY(lastPrice));
+        mGreenPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
+            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+        mRedPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
+            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+      } else {
+        print('false here');
+
+        mLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
+            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+      }
+    }
 
     //画阴影
     mLineFillShader ??= LinearGradient(
       begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      tileMode: TileMode.clamp,
-      colors: [
-        this.chartColors.lineFillColor,
-        this.chartColors.lineFillInsideColor
-      ],
+      end: Alignment.center,
+      tileMode: TileMode.mirror,
+      colors: [this.chartColors.lineFillColor, this.chartColors.lineFillColor],
     ).createShader(Rect.fromLTRB(
         chartRect.left, chartRect.top, chartRect.right, chartRect.bottom));
     mLineFillPaint..shader = mLineFillShader;
@@ -193,9 +231,29 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
     canvas.drawPath(mLineFillPath!, mLineFillPaint);
     mLineFillPath!.reset();
 
-    canvas.drawPath(mLinePath!,
-        mLinePaint..strokeWidth = (mLineStrokeWidth / scaleX).clamp(0.1, 1.0));
-    mLinePath!.reset();
+    if (curPrice < ytdClosePrice! && lastPrice > ytdClosePrice ||
+        curPrice > ytdClosePrice && lastPrice < ytdClosePrice) {
+      canvas.drawPath(
+          mRedPartLinePath!,
+          mLinePaint
+            ..strokeWidth = mLineStrokeWidth
+            ..color = Colors.red);
+      canvas.drawPath(
+          mGreenPartLinePath!,
+          mLinePaint
+            ..strokeWidth = mLineStrokeWidth
+            ..color = Colors.green);
+      mGreenPartLinePath!.reset();
+    } else {
+      canvas.drawPath(
+          mLinePath!,
+          mLinePaint
+            ..strokeWidth = mLineStrokeWidth
+            ..color = (lastPrice > ytdClosePrice && curPrice > ytdClosePrice)
+                ? Colors.green
+                : Colors.red);
+      mLinePath!.reset();
+    }
   }
 
   void drawMaLine(CandleEntity lastPoint, CandleEntity curPoint, Canvas canvas,

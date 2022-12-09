@@ -229,7 +229,7 @@ class _KChartWidgetState extends State<KChartWidget>
             _onDragChanged(true);
           },
           onHorizontalDragUpdate: (details) {
-            if (isScale || isLongPress) return;
+            // if (isScale || isLongPress) return;
             mScrollX = ((details.primaryDelta ?? 0) / mScaleX + mScrollX)
                 .clamp(0.0, ChartPainter.maxScrollX)
                 .toDouble();
@@ -244,7 +244,7 @@ class _KChartWidgetState extends State<KChartWidget>
             isScale = true;
           },
           onScaleUpdate: (details) {
-            if (isDrag || isLongPress) return;
+            // if (isDrag || isLongPress) return;
             mScaleX = (_lastScale * details.scale).clamp(0.5, 2.2);
             notifyChanged();
           },

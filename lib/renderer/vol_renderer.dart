@@ -21,8 +21,15 @@ class VolRenderer extends BaseChartRenderer<VolumeEntity> {
   }
 
   @override
-  void drawChart(VolumeEntity lastPoint, VolumeEntity curPoint, double lastX,
-      double curX, Size size, Canvas canvas) {
+  void drawChart(
+      VolumeEntity lastPoint,
+      VolumeEntity curPoint,
+      double lastX,
+      double curX,
+      double middleX,
+      double? ytdClosePrice,
+      Size size,
+      Canvas canvas) {
     double r = mVolWidth / 2;
     double top = getVolY(curPoint.vol);
     double bottom = chartRect.bottom;

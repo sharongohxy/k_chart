@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Color;
+import 'package:flutter/material.dart' show Color, Colors;
 
 class ChartColors {
   List<Color> bgColor = [Color(0x00000000), Color(0x00000000)];
@@ -35,8 +35,12 @@ class ChartColors {
   Color nowPriceBgColor = Color(0xffbdbdbd);
 
   //深度颜色
-  Color depthBuyColor = Color(0xff60A893);
-  Color depthSellColor = Color(0xffC15866);
+  Color depthBuyColor = Colors.green;
+  Color depthBuyColorLight = Colors.green.shade100;
+  Color depthBuyColorMediumLight = Colors.green.shade200;
+  Color depthSellColor = Colors.red;
+  Color depthSellColorLight = Colors.red.shade100;
+  Color depthSellColorMediumLight = Colors.red.shade200;
   Color depthRemainColor = Color(0xff9E9E9E);
 
   //选中后显示值边框颜色

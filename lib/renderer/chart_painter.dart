@@ -194,7 +194,11 @@ class ChartPainter extends BaseChartPainter {
       KLineEntity lastPoint = i == 0 ? curPoint : datas![i - 1];
       double curX = getX(i);
       double lastX = i == 0 ? curX : getX(i - 1);
-      double middleX = (getX(i) + getX(i + 1)) / 2;
+      double priceDiffIndex = ((value - curPoint.close).abs() -
+              (curPoint.close - lastPoint.close).abs())
+          .abs();
+
+      double middleX = (i - priceDiffIndex) * mPointWidth + mPointWidth / 2;
       mMainRenderer.drawChart(
           lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
       mVolRenderer?.drawChart(
@@ -212,11 +216,11 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawVerticalText(Canvas canvas, Size size) {
-    Paint verticalBg = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 1
-      ..isAntiAlias = true;
-    canvas.drawRect(Rect.fromLTRB(250, 0, size.width, size.height), verticalBg);
+    // Paint verticalBg = Paint()
+    //   ..color = Colors.white
+    //   ..strokeWidth = 1
+    //   ..isAntiAlias = true;
+    // canvas.drawRect(Rect.fromLTRB(250, 0, size.width, size.height), verticalBg);
     var textStyle = getTextStyle(this.chartColors.defaultTextColor);
     mMainRenderer.drawVerticalText(canvas, textStyle, mGridRows);
     mVolRenderer?.drawVerticalText(canvas, textStyle, mGridRows);
@@ -284,7 +288,7 @@ class ChartPainter extends BaseChartPainter {
         (mMainMaxValue - mMainMinValue) * (size.height - 0.16) / size.height;
 
     TextPainter tp = getTextPainter(
-        currentPrice.toStringAsFixed(4), chartColors.crossTextColor);
+        point.close.toStringAsFixed(4), chartColors.crossTextColor);
     double textHeight = tp.height;
     double textWidth = tp.width;
     double offsetX = mWidth - tp.width;
@@ -538,9 +542,11 @@ class ChartPainter extends BaseChartPainter {
     }
     // canvas.drawLine(
     //     Offset(startX, y), Offset(startX + mWidth / scaleX, y), paintX);
-
+    double value = yesterdayLastPriceList.last.value;
     Paint paintDotBuySell = Paint()
-      ..color = this.chartColors.depthBuyColor
+      ..color = (point.close > value)
+          ? this.chartColors.depthBuyColor
+          : this.chartColors.depthSellColor
       ..strokeWidth = 1
       ..isAntiAlias = true;
     canvas.drawCircle(Offset(x, yClose), 5.5, dotBg);

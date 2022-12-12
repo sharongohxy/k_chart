@@ -159,9 +159,20 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
     }
   }
 
-  Shader? mLineFillShader;
-  Path? mLinePath, mLineFillPath, mGreenPartLinePath, mRedPartLinePath;
+  Shader? mLineFillShader, mRedLineFillShader, mGreenLineFillShader;
+  Path? mLinePath,
+      mLineFillPath,
+      mGreenPartLinePath,
+      mRedPartLinePath,
+      mRedLineFillPath,
+      mGreenLineFillPath;
   Paint mLineFillPaint = Paint()
+    ..style = PaintingStyle.fill
+    ..isAntiAlias = true;
+  Paint mRedLineFillPaint = Paint()
+    ..style = PaintingStyle.fill
+    ..isAntiAlias = true;
+  Paint mGreenLineFillPaint = Paint()
     ..style = PaintingStyle.fill
     ..isAntiAlias = true;
 
@@ -181,31 +192,56 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
 //          (lastX + curX) / 2, getY(lastPrice), (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
 //    }
     if (lastX == curX) lastX = 0; //起点位置填充
-    mLinePath!.moveTo(lastX, getY(lastPrice));
-    // mRedPartLinePath!.moveTo(curX, getY(lastPrice));
-    // mGreenPartLinePath!.moveTo(lastX, getY(lastPrice));
+    // mLinePath!.moveTo(lastX, getY(lastPrice));
     if (ytdClosePrice != null) {
       if (curPrice < ytdClosePrice && lastPrice > ytdClosePrice) {
-        print('true here');
-        mRedPartLinePath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
-        mGreenPartLinePath!.moveTo(lastX, getY(lastPrice));
-
-        mRedPartLinePath!.cubicTo((lastX + curX) / 2, getY(ytdClosePrice),
-            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
-        mGreenPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
-            (lastX + curX) / 2, getY(ytdClosePrice), curX, getY(ytdClosePrice));
-      } else if (curPrice > ytdClosePrice && lastPrice < ytdClosePrice) {
+        mRedPartLinePath!.moveTo(curX, getY(curPrice));
         mGreenPartLinePath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
-        mRedPartLinePath!.moveTo(lastX, getY(lastPrice));
-        mGreenPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
-            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
-        mRedPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
-            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
-      } else {
-        print('false here');
+        mRedPartLinePath!.lineTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mGreenPartLinePath!.lineTo(lastX, getY(lastPrice));
 
-        mLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
-            (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+        // mRedPartLinePath!.cubicTo((lastX + curX) / 2, getY(ytdClosePrice),
+        //     (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+        // mGreenPartLinePath!.cubicTo(
+        //     (lastX + curX) / 2,
+        //     getY(lastPrice),
+        //     (lastX + curX) / 2,
+        //     getY(ytdClosePrice),
+        //     middleX,
+        //     getY(ytdClosePrice));
+      } else if (curPrice > ytdClosePrice && lastPrice < ytdClosePrice) {
+        mGreenPartLinePath!.moveTo(curX, getY(curPrice));
+        mRedPartLinePath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mGreenPartLinePath!.lineTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mRedPartLinePath!.lineTo(lastX, getY(lastPrice));
+
+        // mGreenPartLinePath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
+        // mRedPartLinePath!.moveTo(lastX, getY(lastPrice));
+        // mGreenPartLinePath!.cubicTo((lastX + curX) / 2, getY(ytdClosePrice),
+        //     (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+        // mRedPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
+        //     (lastX + curX) / 2, getY(ytdClosePrice), curX, getY(ytdClosePrice));
+      } else if (curPrice == ytdClosePrice || lastPrice == ytdClosePrice) {
+        if (curPrice > ytdClosePrice && lastPrice == ytdClosePrice ||
+            lastPrice > ytdClosePrice && curPrice == ytdClosePrice) {
+          mGreenPartLinePath!.moveTo(curX, getY(curPrice));
+          mGreenPartLinePath!.lineTo(lastX, getY(lastPrice));
+
+          // mGreenPartLinePath!.moveTo(lastX, getY(lastPrice));
+          // mGreenPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
+          //     (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+        } else if (lastPrice < ytdClosePrice && curPrice == ytdClosePrice ||
+            curPrice < ytdClosePrice && lastPrice == ytdClosePrice) {
+          mRedPartLinePath!.moveTo(curX, getY(curPrice));
+          mRedPartLinePath!.lineTo(lastX, getY(lastPrice));
+
+          // mRedPartLinePath!.moveTo(lastX, getY(lastPrice));
+          // mRedPartLinePath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
+          //     (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
+        }
+      } else {
+        mLinePath!.moveTo(curX, getY(curPrice));
+        mLinePath!.lineTo(lastX, getY(lastPrice));
       }
     }
 
@@ -213,26 +249,125 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
     mLineFillShader ??= LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.center,
-      tileMode: TileMode.mirror,
-      colors: [this.chartColors.lineFillColor, this.chartColors.lineFillColor],
+      tileMode: TileMode.clamp,
+      colors: (lastPrice > ytdClosePrice! && curPrice > ytdClosePrice)
+          ? [this.chartColors.depthBuyColor, this.chartColors.depthBuyColor]
+          : [this.chartColors.depthSellColor, this.chartColors.depthSellColor],
     ).createShader(Rect.fromLTRB(
         chartRect.left, chartRect.top, chartRect.right, chartRect.bottom));
     mLineFillPaint..shader = mLineFillShader;
 
+    mRedLineFillShader ??= LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      tileMode: TileMode.clamp,
+      colors: [
+        this.chartColors.depthSellColorMediumLight,
+        this.chartColors.depthSellColorLight,
+        this.chartColors.white,
+      ],
+    ).createShader(Rect.fromLTRB(
+        chartRect.left, chartRect.top, chartRect.right, chartRect.bottom));
+    mRedLineFillPaint..shader = mRedLineFillShader;
+
+    mGreenLineFillShader ??= LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      tileMode: TileMode.clamp,
+      colors: [
+        this.chartColors.depthBuyColorMediumLight,
+        this.chartColors.depthBuyColorLight,
+        this.chartColors.white,
+      ],
+    ).createShader(Rect.fromLTRB(
+        chartRect.left, chartRect.top, chartRect.right, chartRect.bottom));
+    mGreenLineFillPaint..shader = mGreenLineFillShader;
+
     mLineFillPath ??= Path();
+    mRedLineFillPath ??= Path();
+    mGreenLineFillPath ??= Path();
 
-    mLineFillPath!.moveTo(lastX, chartRect.height + chartRect.top);
-    mLineFillPath!.lineTo(lastX, getY(lastPrice));
-    mLineFillPath!.cubicTo((lastX + curX) / 2, getY(lastPrice),
-        (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
-    mLineFillPath!.lineTo(curX, chartRect.height + chartRect.top);
-    mLineFillPath!.close();
+    if (ytdClosePrice != null) {
+      if (curPrice < ytdClosePrice && lastPrice > ytdClosePrice) {
+        mRedLineFillPath!.moveTo(curX, getY(ytdClosePrice));
+        mGreenLineFillPath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mRedLineFillPath!.lineTo(curX, getY(curPrice));
+        mRedLineFillPath!.lineTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mRedLineFillPath!.close();
 
-    canvas.drawPath(mLineFillPath!, mLineFillPaint);
-    mLineFillPath!.reset();
+        mGreenLineFillPath!.lineTo(lastX, getY(ytdClosePrice));
+        mGreenLineFillPath!.lineTo(lastX, getY(lastPrice));
+        mGreenLineFillPath!.close();
+
+        canvas.drawPath(mRedLineFillPath!, mRedLineFillPaint);
+        canvas.drawPath(mGreenLineFillPath!, mGreenLineFillPaint);
+        mRedLineFillPath!.reset();
+        mGreenLineFillPath!.reset();
+      } else if (curPrice > ytdClosePrice && lastPrice < ytdClosePrice) {
+        mGreenLineFillPath!.moveTo(curX, getY(ytdClosePrice));
+        mRedLineFillPath!.moveTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mGreenLineFillPath!.lineTo(curX, getY(curPrice));
+        mGreenLineFillPath!.lineTo((curX + lastX) / 2, getY(ytdClosePrice));
+        mGreenLineFillPath!.close();
+
+        mRedLineFillPath!.lineTo(lastX, getY(ytdClosePrice));
+        mRedLineFillPath!.lineTo(lastX, getY(lastPrice));
+        mRedLineFillPath!.close();
+
+        canvas.drawPath(mRedLineFillPath!, mRedLineFillPaint);
+        canvas.drawPath(mGreenLineFillPath!, mGreenLineFillPaint);
+        mRedLineFillPath!.reset();
+        mGreenLineFillPath!.reset();
+      } else if (curPrice == ytdClosePrice || lastPrice == ytdClosePrice) {
+        if (curPrice > ytdClosePrice && lastPrice == ytdClosePrice ||
+            lastPrice > ytdClosePrice && curPrice == ytdClosePrice) {
+          mGreenLineFillPath!.moveTo(curX, getY(ytdClosePrice));
+          if (curPrice > ytdClosePrice) {
+            mGreenLineFillPath!.lineTo(curX, getY(curPrice));
+            mGreenLineFillPath!.lineTo(lastX, getY(ytdClosePrice));
+          } else if (lastPrice > ytdClosePrice) {
+            mGreenLineFillPath!.lineTo(lastX, getY(ytdClosePrice));
+            mGreenLineFillPath!.lineTo(lastX, getY(lastPrice));
+          }
+          mGreenLineFillPath!.close();
+
+          canvas.drawPath(mGreenLineFillPath!, mGreenLineFillPaint);
+          mGreenLineFillPath!.reset();
+        } else if (lastPrice < ytdClosePrice && curPrice == ytdClosePrice ||
+            curPrice < ytdClosePrice && lastPrice == ytdClosePrice) {
+          mRedLineFillPath!.moveTo(curX, getY(ytdClosePrice));
+          if (lastPrice < ytdClosePrice) {
+            mRedLineFillPath!.lineTo(lastX, getY(ytdClosePrice));
+            mRedLineFillPath!.lineTo(lastX, getY(lastPrice));
+          } else if (curPrice < ytdClosePrice) {
+            mRedLineFillPath!.lineTo(curX, getY(curPrice));
+            mRedLineFillPath!.lineTo(lastX, getY(ytdClosePrice));
+          }
+          mRedLineFillPath!.close();
+          canvas.drawPath(mRedLineFillPath!, mRedLineFillPaint);
+          mRedLineFillPath!.reset();
+        }
+      } else {
+        mLineFillPath!.moveTo(lastX, getY(ytdClosePrice));
+        mLineFillPath!.lineTo(lastX, getY(lastPrice));
+
+        mLineFillPath!.lineTo(curX, getY(curPrice));
+        mLineFillPath!.lineTo(curX, getY(ytdClosePrice));
+        mLineFillPath!.close();
+
+        canvas.drawPath(
+            mLineFillPath!,
+            (lastPrice > ytdClosePrice && curPrice > ytdClosePrice)
+                ? mGreenLineFillPaint
+                : mRedLineFillPaint);
+        mLineFillPath!.reset();
+      }
+    }
 
     if (curPrice < ytdClosePrice! && lastPrice > ytdClosePrice ||
-        curPrice > ytdClosePrice && lastPrice < ytdClosePrice) {
+        curPrice > ytdClosePrice && lastPrice < ytdClosePrice ||
+        curPrice == ytdClosePrice ||
+        lastPrice == ytdClosePrice) {
       canvas.drawPath(
           mRedPartLinePath!,
           mLinePaint
@@ -243,6 +378,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
           mLinePaint
             ..strokeWidth = mLineStrokeWidth
             ..color = Colors.green);
+      mRedPartLinePath!.reset();
       mGreenPartLinePath!.reset();
     } else {
       canvas.drawPath(

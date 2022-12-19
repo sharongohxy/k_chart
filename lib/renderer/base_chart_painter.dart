@@ -46,6 +46,7 @@ abstract class BaseChartPainter extends CustomPainter {
   late double mPointWidth;
   List<String> mFormats = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn]; //格式化时间
   double xFrontPadding;
+  List<String> tooltipDateFormats = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn];
 
   BaseChartPainter(
     this.chartStyle, {
@@ -74,6 +75,10 @@ abstract class BaseChartPainter extends CustomPainter {
   }
 
   void initFormats() {
+    if (this.chartStyle.tooltipDateFormat != null) {
+      tooltipDateFormats = this.chartStyle.tooltipDateFormat!;
+    }
+
     if (this.chartStyle.dateTimeFormat != null) {
       mFormats = this.chartStyle.dateTimeFormat!;
       return;

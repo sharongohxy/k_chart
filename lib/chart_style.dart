@@ -120,4 +120,6 @@ class ChartStyle {
 
   //下方時間客製化
   List<String>? dateTimeFormat;
+
+  List<String>? tooltipDateFormat;
 }

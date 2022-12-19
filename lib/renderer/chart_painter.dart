@@ -306,7 +306,7 @@ class ChartPainter extends BaseChartPainter {
     double r = textHeight / 2 + w2;
     double x;
     TextPainter dateTp =
-        getTextPainter(getDate(point.time), chartColors.crossTextColor);
+        getTextPainter(getTooltipDate(point.time), chartColors.crossTextColor);
     textWidth = dateTp.width;
     r = textHeight / 2;
     x = translateXtoX(getX(index));
@@ -597,6 +597,14 @@ class ChartPainter extends BaseChartPainter {
       DateTime.fromMillisecondsSinceEpoch(
           date ?? DateTime.now().millisecondsSinceEpoch),
       mFormats);
+
+  String getTooltipDate(int? date) {
+    return dateFormat(
+      DateTime.fromMillisecondsSinceEpoch(
+          date ?? DateTime.now().millisecondsSinceEpoch),
+      tooltipDateFormats,
+    );
+  }
 
   double getMainY(double y) => mMainRenderer.getY(y);
 

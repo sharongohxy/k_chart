@@ -229,9 +229,12 @@ abstract class BaseChartPainter extends CustomPainter {
     mMainMinValue = min(mMainMinValue, minPrice);
 
     if (mMainHighMaxValue < item.high) {
-      if (shouldShowYesterdayLastPriceLine() &&
-          yesterdayLastPrice! > item.high) {
-        mMainHighMaxValue = yesterdayLastPrice!;
+      if (shouldShowYesterdayLastPriceLine()) {
+        if (yesterdayLastPrice! > item.high) {
+          mMainHighMaxValue = yesterdayLastPrice!;
+        } else {
+          mMainHighMaxValue = item.high;
+        }
       } else {
         mMainHighMaxValue = item.high;
       }
@@ -243,6 +246,8 @@ abstract class BaseChartPainter extends CustomPainter {
           mMainLowMinValue = yesterdayLastPrice!;
         } else if (datas!.last.close < yesterdayLastPrice!) {
           mMainLowMinValue = datas!.last.close;
+        } else {
+          mMainLowMinValue = item.low;
         }
       } else {
         mMainLowMinValue = item.low;
@@ -250,26 +255,17 @@ abstract class BaseChartPainter extends CustomPainter {
       mMainMinIndex = i;
     }
 
-    // TODO: MICHAEL
     if (isLine == true) {
       mMainMaxValue = max(
-        mMainMaxValue,
-        // shouldShowYesterdayLastPriceLine()
-        //     ? max(yesterdayLastPrice!, item.close)
-        //     :
-        item.close,
-      );
+          mMainMaxValue,
+          shouldShowYesterdayLastPriceLine()
+              ? max(yesterdayLastPrice!, item.close)
+              : item.close);
       mMainMinValue = min(
-        mMainMinValue,
-        // shouldShowYesterdayLastPriceLine()
-        //     ? min(
-        //         (datas?.isNotEmpty ?? false)
-        //             ? min(yesterdayLastPrice!, datas!.last.close)
-        //             : yesterdayLastPrice!,
-        //         item.close)
-        //     :
-        item.close,
-      );
+          mMainMinValue,
+          shouldShowYesterdayLastPriceLine()
+              ? min(yesterdayLastPrice!, item.close)
+              : item.close);
     }
   }
 

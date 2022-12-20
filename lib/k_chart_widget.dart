@@ -43,6 +43,7 @@ class KChartWidget extends StatefulWidget {
   final List<String> timeFormat;
   final bool showYesterdayLastPriceLine;
   final double? yesterdayLastPrice;
+  final bool coloriseChartBasedOnBaselineValue;
 
   //当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
   final Function(bool)? onLoadMore;
@@ -91,6 +92,7 @@ class KChartWidget extends StatefulWidget {
     this.isBusy = true,
     this.showYesterdayLastPriceLine = true,
     this.yesterdayLastPrice,
+    this.coloriseChartBasedOnBaselineValue = false,
   });
 
   @override
@@ -181,6 +183,8 @@ class _KChartWidgetState extends State<KChartWidget>
       verticalTextAlignment: widget.verticalTextAlignment,
       showYesterdayLastPriceLine: widget.showYesterdayLastPriceLine,
       yesterdayLastPrice: widget.yesterdayLastPrice,
+      coloriseChartBasedOnBaselineValue:
+          widget.coloriseChartBasedOnBaselineValue,
     );
 
     return LayoutBuilder(

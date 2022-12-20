@@ -53,6 +53,7 @@ class ChartPainter extends BaseChartPainter {
   final VerticalTextAlignment verticalTextAlignment;
   final bool showYesterdayLastPriceLine;
   final double? yesterdayLastPrice;
+  final bool coloriseChartBasedOnBaselineValue;
 
   ChartPainter(
     this.chartStyle,
@@ -80,6 +81,7 @@ class ChartPainter extends BaseChartPainter {
     this.maDayList = const [5, 10, 20],
     this.showYesterdayLastPriceLine = true,
     this.yesterdayLastPrice,
+    this.coloriseChartBasedOnBaselineValue = false,
   }) : super(
           chartStyle,
           datas: datas,
@@ -134,6 +136,7 @@ class ChartPainter extends BaseChartPainter {
       verticalTextAlignment,
       showYesterdayLastPriceLine,
       yesterdayLastPrice,
+      coloriseChartBasedOnBaselineValue,
       datas,
       maDayList,
     );
@@ -627,9 +630,13 @@ class ChartPainter extends BaseChartPainter {
     double value =
         this.shouldShowYesterdayLastPriceLine() ? yesterdayLastPrice! : 0.0;
     Paint paintDotBuySell = Paint()
-      ..color = (point.close > value)
-          ? this.chartColors.depthBuyColor
-          : this.chartColors.depthSellColor
+      ..color = coloriseChartBasedOnBaselineValue
+          ? (point.close > value)
+              ? this.chartColors.depthBuyColor
+              : this.chartColors.depthSellColor
+          : datas!.last.close > value
+              ? this.chartColors.depthBuyColor
+              : this.chartColors.depthSellColor
       ..strokeWidth = 1
       ..isAntiAlias = true;
     if (this.shouldShowYesterdayLastPriceLine()) {

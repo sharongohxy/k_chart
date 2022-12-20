@@ -32,7 +32,10 @@ class ChartColors {
   Color nowPriceUpColor = Color(0xff4DAA90);
   Color nowPriceDnColor = Color(0xffC15466);
   Color nowPriceTextColor = Color(0xffffffff);
-  Color nowPriceBgColor = Color(0xffbdbdbd);
+  Color nowPriceBgColor = Color(0xFF2F8DFA);
+
+  Color yesterdayPriceTextColor = Color(0xff000000);
+  Color yesterdayPriceBgColor = Color(0xffbdbdbd);
 
   //深度颜色
   Color depthBuyColor = Colors.green;

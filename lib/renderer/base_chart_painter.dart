@@ -24,6 +24,8 @@ abstract class BaseChartPainter extends CustomPainter {
   bool isLongPress = false;
   bool isOnTap;
   bool isLine;
+  bool showYesterdayLastPriceLine;
+  double? yesterdayLastPrice;
 
   //3块区域大小与位置
   late Rect mMainRect;
@@ -62,6 +64,8 @@ abstract class BaseChartPainter extends CustomPainter {
     this.isTapShowInfoDialog = false,
     this.secondaryState = SecondaryState.MACD,
     this.isLine = false,
+    this.showYesterdayLastPriceLine = true,
+    this.yesterdayLastPrice,
   }) {
     mItemCount = datas?.length ?? 0;
     mPointWidth = this.chartStyle.pointWidth;
@@ -125,6 +129,7 @@ abstract class BaseChartPainter extends CustomPainter {
       drawText(canvas, datas!.last, 5);
       drawMaxAndMin(canvas);
       drawNowPrice(canvas);
+      drawYesterdayLastPrice(canvas);
 
       if (isLongPress == true || (isTapShowInfoDialog && isOnTap)) {
         drawCrossLineText(canvas, size);
@@ -158,6 +163,8 @@ abstract class BaseChartPainter extends CustomPainter {
 
   //画当前价格
   void drawNowPrice(Canvas canvas);
+
+  void drawYesterdayLastPrice(Canvas canvas);
 
   //画交叉线
   void drawCrossLine(Canvas canvas, Size size);
@@ -222,18 +229,52 @@ abstract class BaseChartPainter extends CustomPainter {
     mMainMinValue = min(mMainMinValue, minPrice);
 
     if (mMainHighMaxValue < item.high) {
-      mMainHighMaxValue = item.high;
+      if (shouldShowYesterdayLastPriceLine() &&
+          yesterdayLastPrice! > item.high) {
+        mMainHighMaxValue = yesterdayLastPrice!;
+      } else {
+        mMainHighMaxValue = item.high;
+      }
       mMainMaxIndex = i;
     }
     if (mMainLowMinValue > item.low) {
-      mMainLowMinValue = item.low;
+      if (shouldShowYesterdayLastPriceLine()) {
+        if (yesterdayLastPrice! < item.low) {
+          mMainLowMinValue = yesterdayLastPrice!;
+        } else if (datas!.last.close < yesterdayLastPrice!) {
+          mMainLowMinValue = datas!.last.close;
+        }
+      } else {
+        mMainLowMinValue = item.low;
+      }
       mMainMinIndex = i;
     }
 
+    // TODO: MICHAEL
     if (isLine == true) {
-      mMainMaxValue = max(mMainMaxValue, item.close);
-      mMainMinValue = min(mMainMinValue, item.close);
+      mMainMaxValue = max(
+        mMainMaxValue,
+        // shouldShowYesterdayLastPriceLine()
+        //     ? max(yesterdayLastPrice!, item.close)
+        //     :
+        item.close,
+      );
+      mMainMinValue = min(
+        mMainMinValue,
+        // shouldShowYesterdayLastPriceLine()
+        //     ? min(
+        //         (datas?.isNotEmpty ?? false)
+        //             ? min(yesterdayLastPrice!, datas!.last.close)
+        //             : yesterdayLastPrice!,
+        //         item.close)
+        //     :
+        item.close,
+      );
     }
+  }
+
+  bool shouldShowYesterdayLastPriceLine() {
+    return showYesterdayLastPriceLine && yesterdayLastPrice != null;
   }
 
   double _findMaxMA(List<double> a) {

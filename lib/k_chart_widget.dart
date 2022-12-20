@@ -41,7 +41,8 @@ class KChartWidget extends StatefulWidget {
   final bool materialInfoDialog; // Material风格的信息弹窗
   final Map<String, ChartTranslations> translations;
   final List<String> timeFormat;
-  final List yesterdayLastPriceList;
+  final bool showYesterdayLastPriceLine;
+  final double? yesterdayLastPrice;
 
   //当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
   final Function(bool)? onLoadMore;
@@ -88,7 +89,8 @@ class KChartWidget extends StatefulWidget {
     this.isOnDrag,
     this.verticalTextAlignment = VerticalTextAlignment.left,
     this.isBusy = true,
-    required this.yesterdayLastPriceList,
+    this.showYesterdayLastPriceLine = true,
+    this.yesterdayLastPrice,
   });
 
   @override
@@ -177,7 +179,8 @@ class _KChartWidgetState extends State<KChartWidget>
       fixedLength: widget.fixedLength,
       maDayList: widget.maDayList,
       verticalTextAlignment: widget.verticalTextAlignment,
-      yesterdayLastPriceList: widget.yesterdayLastPriceList,
+      showYesterdayLastPriceLine: widget.showYesterdayLastPriceLine,
+      yesterdayLastPrice: widget.yesterdayLastPrice,
     );
 
     return LayoutBuilder(

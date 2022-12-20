@@ -28,7 +28,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   double scaleX;
   late Paint mLinePaint;
   final VerticalTextAlignment verticalTextAlignment;
-  final List yesterdayLastPriceList;
+  final bool showYesterdayLastPriceLine;
+  final double? yesterdayLastPrice;
   final List<KLineEntity>? datas;
 
   MainRenderer(
@@ -43,7 +44,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       this.chartColors,
       this.scaleX,
       this.verticalTextAlignment,
-      this.yesterdayLastPriceList,
+      this.showYesterdayLastPriceLine,
+      this.yesterdayLastPrice,
       this.datas,
       [this.maDayList = const [5, 10, 20]])
       : super(
@@ -59,9 +61,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       ..isAntiAlias = true
       ..style = PaintingStyle.stroke
       ..strokeWidth = mLineStrokeWidth
-      ..color = (datas?.length != 0)
-          ? getKLineColor(
-              (datas!.last.close - yesterdayLastPriceList.last?.value))
+      ..color = (datas?.length != 0 && yesterdayLastPrice != null)
+          ? getKLineColor((datas!.last.close - yesterdayLastPrice!))
           : this.chartColors.depthRemainColor;
     // ..color = this.chartColors.kLineColor;
     _contentRect = Rect.fromLTRB(

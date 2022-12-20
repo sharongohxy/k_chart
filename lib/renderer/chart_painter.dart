@@ -43,12 +43,16 @@ class ChartPainter extends BaseChartPainter {
   int fixedLength;
   List<int> maDayList;
   final ChartColors chartColors;
-  late Paint selectPointPaint, selectorBorderPaint, nowPricePaint;
+  late Paint selectPointPaint,
+      selectorBorderPaint,
+      nowPricePaint,
+      yesterdayLastPricePaint;
   final ChartStyle chartStyle;
   final bool hideGrid;
   final bool showNowPrice;
   final VerticalTextAlignment verticalTextAlignment;
-  final List yesterdayLastPriceList;
+  final bool showYesterdayLastPriceLine;
+  final double? yesterdayLastPrice;
 
   ChartPainter(
     this.chartStyle,
@@ -74,20 +78,25 @@ class ChartPainter extends BaseChartPainter {
     this.showNowPrice = true,
     this.fixedLength = 4,
     this.maDayList = const [5, 10, 20],
-    required this.yesterdayLastPriceList,
-  }) : super(chartStyle,
-            datas: datas,
-            scaleX: scaleX,
-            scrollX: scrollX,
-            isLongPress: isLongPass,
-            isOnTap: isOnTap,
-            isTapShowInfoDialog: isTapShowInfoDialog,
-            selectX: selectX,
-            mainState: mainState,
-            volHidden: volHidden,
-            secondaryState: secondaryState,
-            xFrontPadding: xFrontPadding,
-            isLine: isLine) {
+    this.showYesterdayLastPriceLine = true,
+    this.yesterdayLastPrice,
+  }) : super(
+          chartStyle,
+          datas: datas,
+          scaleX: scaleX,
+          scrollX: scrollX,
+          isLongPress: isLongPass,
+          isOnTap: isOnTap,
+          isTapShowInfoDialog: isTapShowInfoDialog,
+          selectX: selectX,
+          mainState: mainState,
+          volHidden: volHidden,
+          secondaryState: secondaryState,
+          xFrontPadding: xFrontPadding,
+          isLine: isLine,
+          showYesterdayLastPriceLine: showYesterdayLastPriceLine,
+          yesterdayLastPrice: yesterdayLastPrice,
+        ) {
     selectPointPaint = Paint()
       // ..isAntiAlias = true
       ..strokeWidth = 0.5
@@ -98,6 +107,9 @@ class ChartPainter extends BaseChartPainter {
       ..style = PaintingStyle.stroke
       ..color = this.chartColors.selectBorderColor;
     nowPricePaint = Paint()
+      ..strokeWidth = this.chartStyle.nowPriceLineWidth
+      ..isAntiAlias = true;
+    yesterdayLastPricePaint = Paint()
       ..strokeWidth = this.chartStyle.nowPriceLineWidth
       ..isAntiAlias = true;
   }
@@ -120,7 +132,8 @@ class ChartPainter extends BaseChartPainter {
       this.chartColors,
       this.scaleX,
       verticalTextAlignment,
-      yesterdayLastPriceList,
+      showYesterdayLastPriceLine,
+      yesterdayLastPrice,
       datas,
       maDayList,
     );
@@ -187,18 +200,24 @@ class ChartPainter extends BaseChartPainter {
     canvas.save();
     canvas.translate(mTranslateX * scaleX, 0.0);
     canvas.scale(scaleX, 1.0);
-    double value = yesterdayLastPriceList.last.value;
+    double value =
+        shouldShowYesterdayLastPriceLine() ? yesterdayLastPrice! : 0.0;
     for (int i = mStartIndex; datas != null && i <= mStopIndex; i++) {
       KLineEntity? curPoint = datas?[i];
       if (curPoint == null) continue;
       KLineEntity lastPoint = i == 0 ? curPoint : datas![i - 1];
       double curX = getX(i);
       double lastX = i == 0 ? curX : getX(i - 1);
-      double priceDiffIndex = ((value - curPoint.close).abs() -
-              (curPoint.close - lastPoint.close).abs())
-          .abs();
+      double middleX;
+      if (shouldShowYesterdayLastPriceLine()) {
+        double priceDiffIndex = ((value - curPoint.close).abs() -
+                (curPoint.close - lastPoint.close).abs())
+            .abs();
+        middleX = (i - priceDiffIndex) * mPointWidth + mPointWidth / 2;
+      } else {
+        middleX = (getX(i) + getX(i + 1)) / 2;
+      }
 
-      double middleX = (i - priceDiffIndex) * mPointWidth + mPointWidth / 2;
       mMainRenderer.drawChart(
           lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
       mVolRenderer?.drawChart(
@@ -389,7 +408,7 @@ class ChartPainter extends BaseChartPainter {
       return;
     }
 
-    double value = yesterdayLastPriceList.last.value;
+    double value = datas!.last.close;
     double y = getMainY(value);
 
     //视图展示区域边界值绘制
@@ -430,6 +449,60 @@ class ChartPainter extends BaseChartPainter {
         Rect.fromLTRB(
             offsetX - 8, top - 3, offsetX + tp.width + 8, top + tp.height + 3),
         nowPricePaint);
+    tp.paint(canvas, Offset(offsetX, top));
+  }
+
+  @override
+  void drawYesterdayLastPrice(Canvas canvas) {
+    if (!this.shouldShowYesterdayLastPriceLine()) {
+      return;
+    }
+
+    if (datas == null) {
+      return;
+    }
+
+    double value = yesterdayLastPrice!;
+    double y = getMainY(value);
+
+    //视图展示区域边界值绘制
+    if (y > getMainY(mMainLowMinValue)) {
+      y = getMainY(mMainLowMinValue);
+    }
+
+    if (y < getMainY(mMainHighMaxValue)) {
+      y = getMainY(mMainHighMaxValue);
+    }
+
+    yesterdayLastPricePaint..color = this.chartColors.yesterdayPriceBgColor;
+    //先画横线
+
+    //再画背景和文本
+    TextPainter tp = getTextPainter(value.toStringAsFixed(fixedLength),
+        this.chartColors.yesterdayPriceTextColor);
+    double startX = 0;
+    final max = mWidth - tp.width;
+    final space = 2;
+    while (startX < max) {
+      canvas.drawLine(Offset(startX, y), Offset(startX + space, y),
+          yesterdayLastPricePaint);
+      startX += space + space;
+    }
+    double offsetX;
+    switch (verticalTextAlignment) {
+      case VerticalTextAlignment.left:
+        offsetX = 0;
+        break;
+      case VerticalTextAlignment.right:
+        offsetX = mWidth - tp.width;
+        break;
+    }
+
+    double top = y - tp.height / 2;
+    canvas.drawRect(
+        Rect.fromLTRB(
+            offsetX - 8, top - 3, offsetX + tp.width + 8, top + tp.height + 3),
+        yesterdayLastPricePaint);
     tp.paint(canvas, Offset(offsetX, top));
   }
 
@@ -497,6 +570,10 @@ class ChartPainter extends BaseChartPainter {
       ..color = this.chartColors.nowPriceBgColor
       ..strokeWidth = 1
       ..isAntiAlias = true;
+    Paint yesterdayClosePriceBg = Paint()
+      ..color = this.chartColors.yesterdayPriceBgColor
+      ..strokeWidth = 1
+      ..isAntiAlias = true;
     Paint dotBg = Paint()
       ..color = this.chartColors.white
       ..strokeWidth = 1
@@ -507,7 +584,12 @@ class ChartPainter extends BaseChartPainter {
       ..isAntiAlias = true;
     double x = getX(index);
     double y = getMainY(point.close);
-    double yClose = getMainY(yesterdayLastPriceList.last.value);
+    double yClose = this.shouldShowYesterdayLastPriceLine()
+        ? getMainY(yesterdayLastPrice!)
+        : 0.0;
+    double nowPrice = this.showNowPrice && (datas?.isNotEmpty ?? false)
+        ? getMainY(datas!.last.close)
+        : 0.0;
     // k线图竖线
 
     double dashHeight = 7, dashWidth = 7, dashSpace = 6;
@@ -542,15 +624,22 @@ class ChartPainter extends BaseChartPainter {
     }
     // canvas.drawLine(
     //     Offset(startX, y), Offset(startX + mWidth / scaleX, y), paintX);
-    double value = yesterdayLastPriceList.last.value;
+    double value =
+        this.shouldShowYesterdayLastPriceLine() ? yesterdayLastPrice! : 0.0;
     Paint paintDotBuySell = Paint()
       ..color = (point.close > value)
           ? this.chartColors.depthBuyColor
           : this.chartColors.depthSellColor
       ..strokeWidth = 1
       ..isAntiAlias = true;
-    canvas.drawCircle(Offset(x, yClose), 5.5, dotBg);
-    canvas.drawCircle(Offset(x, yClose), 4, dotClosePriceBg);
+    if (this.shouldShowYesterdayLastPriceLine()) {
+      canvas.drawCircle(Offset(x, yClose), 5.5, dotBg);
+      canvas.drawCircle(Offset(x, yClose), 4, yesterdayClosePriceBg);
+    }
+    if (this.showNowPrice) {
+      canvas.drawCircle(Offset(x, nowPrice), 5.5, dotBg);
+      canvas.drawCircle(Offset(x, nowPrice), 4, dotClosePriceBg);
+    }
     canvas.drawCircle(Offset(x, y), 5.5, dotBg);
     canvas.drawCircle(Offset(x, y), 4, paintDotBuySell);
     // if (scaleX >= 1) {

@@ -195,6 +195,7 @@ class _KChartWidgetState extends State<KChartWidget>
         return GestureDetector(
           onTap: () {
             isLongPress = false;
+            notifyChanged();
           },
           onTapUp: (details) {
             if (!widget.isTrendLine &&

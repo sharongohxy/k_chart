@@ -56,6 +56,7 @@ class ChartPainter extends BaseChartPainter {
   final bool coloriseChartBasedOnBaselineValue;
   final bool? isSparklineChart;
   final bool? forceShowBeginningOfXAxis;
+  final bool? showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice;
 
   ChartPainter(
     this.chartStyle,
@@ -86,6 +87,7 @@ class ChartPainter extends BaseChartPainter {
     this.coloriseChartBasedOnBaselineValue = false,
     this.isSparklineChart = false,
     this.forceShowBeginningOfXAxis = true,
+    this.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice = true,
   }) : super(
           chartStyle,
           datas: datas,
@@ -145,6 +147,7 @@ class ChartPainter extends BaseChartPainter {
       yesterdayLastPrice,
       coloriseChartBasedOnBaselineValue,
       datas,
+      showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice,
       maDayList,
       mLineStrokeWidth,
     );

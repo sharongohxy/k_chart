@@ -32,6 +32,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   final double? yesterdayLastPrice;
   final bool coloriseChartBasedOnBaselineValue;
   final List<KLineEntity>? datas;
+  final bool? showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice;
 
   MainRenderer(
     Rect mainRect,
@@ -49,6 +50,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
     this.yesterdayLastPrice,
     this.coloriseChartBasedOnBaselineValue,
     this.datas, [
+    this.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice = true,
     this.maDayList = const [5, 10, 20],
     this.mLineStrokeWidth = 2.0,
   ]) : super(
@@ -258,14 +260,18 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
 
     //画阴影
     mLineFillShader ??= LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.center,
+      begin: coloriseChartBasedOnBaselineValue
+          ? Alignment.bottomCenter
+          : Alignment.topCenter,
+      end: coloriseChartBasedOnBaselineValue
+          ? Alignment.topCenter
+          : Alignment.bottomCenter,
       tileMode: TileMode.clamp,
-      colors: (lastPrice > ytdClosePrice! && curPrice > ytdClosePrice)
-          ? [this.chartColors.depthBuyColor, this.chartColors.depthBuyColor]
-          : [this.chartColors.depthSellColor, this.chartColors.depthSellColor],
-      // tileMode: TileMode.mirror,
-      // colors: [this.chartColors.lineFillColor, this.chartColors.lineFillColor],
+      colors: [
+        this.chartColors.depthRemainColor.withOpacity(0.3),
+        this.chartColors.depthRemainColor.withOpacity(0.15),
+        this.chartColors.depthRemainColor.withOpacity(0.0),
+      ],
     ).createShader(Rect.fromLTRB(
         chartRect.left, chartRect.top, chartRect.right, chartRect.bottom));
     mLineFillPaint..shader = mLineFillShader;
@@ -394,9 +400,13 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       if (ytdClosePrice != null) {
         canvas.drawPath(
             mLineFillPath!,
-            latestClosePrice > ytdClosePrice
-                ? mGreenLineFillPaint
-                : mRedLineFillPaint);
+            latestClosePrice == ytdClosePrice &&
+                    showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice ==
+                        true
+                ? mLineFillPaint
+                : latestClosePrice > ytdClosePrice
+                    ? mGreenLineFillPaint
+                    : mRedLineFillPaint);
         mLineFillPath!.reset();
       }
 
@@ -405,9 +415,13 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
             mLinePath!,
             mLinePaint
               ..strokeWidth = mLineStrokeWidth
-              ..color = latestClosePrice > ytdClosePrice
-                  ? chartColors.depthBuyColor
-                  : chartColors.depthSellColor);
+              ..color = latestClosePrice == ytdClosePrice &&
+                      showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice ==
+                          true
+                  ? chartColors.depthRemainColor
+                  : latestClosePrice > ytdClosePrice
+                      ? chartColors.depthBuyColor
+                      : chartColors.depthSellColor);
         mLinePath!.reset();
       }
     }

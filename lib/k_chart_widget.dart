@@ -44,6 +44,8 @@ class KChartWidget extends StatefulWidget {
   final bool showYesterdayLastPriceLine;
   final double? yesterdayLastPrice;
   final bool coloriseChartBasedOnBaselineValue;
+  final bool? isSparklineChart;
+  final bool? forceShowBeginningOfXAxis;
 
   //当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
   final Function(bool)? onLoadMore;
@@ -93,6 +95,8 @@ class KChartWidget extends StatefulWidget {
     this.showYesterdayLastPriceLine = true,
     this.yesterdayLastPrice,
     this.coloriseChartBasedOnBaselineValue = false,
+    this.isSparklineChart = false,
+    this.forceShowBeginningOfXAxis = true,
   });
 
   @override
@@ -185,6 +189,8 @@ class _KChartWidgetState extends State<KChartWidget>
       yesterdayLastPrice: widget.yesterdayLastPrice,
       coloriseChartBasedOnBaselineValue:
           widget.coloriseChartBasedOnBaselineValue,
+      isSparklineChart: widget.isSparklineChart,
+      forceShowBeginningOfXAxis: widget.forceShowBeginningOfXAxis,
     );
 
     return LayoutBuilder(

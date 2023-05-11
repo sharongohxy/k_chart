@@ -24,7 +24,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   List<int> maDayList;
   final ChartStyle chartStyle;
   final ChartColors chartColors;
-  final double mLineStrokeWidth = 2.0;
+  final double mLineStrokeWidth;
   double scaleX;
   late Paint mLinePaint;
   final VerticalTextAlignment verticalTextAlignment;
@@ -34,23 +34,24 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   final List<KLineEntity>? datas;
 
   MainRenderer(
-      Rect mainRect,
-      double maxValue,
-      double minValue,
-      double topPadding,
-      this.state,
-      this.isLine,
-      int fixedLength,
-      this.chartStyle,
-      this.chartColors,
-      this.scaleX,
-      this.verticalTextAlignment,
-      this.showYesterdayLastPriceLine,
-      this.yesterdayLastPrice,
-      this.coloriseChartBasedOnBaselineValue,
-      this.datas,
-      [this.maDayList = const [5, 10, 20]])
-      : super(
+    Rect mainRect,
+    double maxValue,
+    double minValue,
+    double topPadding,
+    this.state,
+    this.isLine,
+    int fixedLength,
+    this.chartStyle,
+    this.chartColors,
+    this.scaleX,
+    this.verticalTextAlignment,
+    this.showYesterdayLastPriceLine,
+    this.yesterdayLastPrice,
+    this.coloriseChartBasedOnBaselineValue,
+    this.datas, [
+    this.maDayList = const [5, 10, 20],
+    this.mLineStrokeWidth = 2.0,
+  ]) : super(
             chartRect: mainRect,
             maxValue: maxValue,
             minValue: minValue,
@@ -278,8 +279,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
           : Alignment.bottomCenter,
       tileMode: TileMode.clamp,
       colors: [
-        this.chartColors.depthSellColor.withOpacity(0.2),
-        this.chartColors.depthSellColor.withOpacity(0.1),
+        this.chartColors.depthSellColor.withOpacity(0.3),
+        this.chartColors.depthSellColor.withOpacity(0.15),
         this.chartColors.depthSellColor.withOpacity(0.0),
       ],
     ).createShader(Rect.fromLTRB(
@@ -291,8 +292,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       end: Alignment.bottomCenter,
       tileMode: TileMode.clamp,
       colors: [
-        this.chartColors.depthBuyColor.withOpacity(0.2),
-        this.chartColors.depthBuyColor.withOpacity(0.1),
+        this.chartColors.depthBuyColor.withOpacity(0.3),
+        this.chartColors.depthBuyColor.withOpacity(0.15),
         this.chartColors.depthBuyColor.withOpacity(0.0),
       ],
     ).createShader(Rect.fromLTRB(

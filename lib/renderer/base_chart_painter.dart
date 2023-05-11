@@ -26,6 +26,7 @@ abstract class BaseChartPainter extends CustomPainter {
   bool isLine;
   bool showYesterdayLastPriceLine;
   double? yesterdayLastPrice;
+  bool? forceShowBeginningOfXAxis;
 
   //3块区域大小与位置
   late Rect mMainRect;
@@ -66,6 +67,7 @@ abstract class BaseChartPainter extends CustomPainter {
     this.isLine = false,
     this.showYesterdayLastPriceLine = true,
     this.yesterdayLastPrice,
+    this.forceShowBeginningOfXAxis = true,
   }) {
     mItemCount = datas?.length ?? 0;
     mPointWidth = this.chartStyle.pointWidth;
@@ -378,6 +380,9 @@ abstract class BaseChartPainter extends CustomPainter {
 
   ///获取平移的最小值
   double getMinTranslateX() {
+    if (forceShowBeginningOfXAxis ?? false) {
+      return 0;
+    }
     var x = -mDataLen + mWidth / scaleX - mPointWidth / 2 - xFrontPadding;
     return x >= 0 ? 0.0 : x;
   }

@@ -54,6 +54,8 @@ class ChartPainter extends BaseChartPainter {
   final bool showYesterdayLastPriceLine;
   final double? yesterdayLastPrice;
   final bool coloriseChartBasedOnBaselineValue;
+  final bool? isSparklineChart;
+  final bool? forceShowBeginningOfXAxis;
 
   ChartPainter(
     this.chartStyle,
@@ -82,6 +84,8 @@ class ChartPainter extends BaseChartPainter {
     this.showYesterdayLastPriceLine = true,
     this.yesterdayLastPrice,
     this.coloriseChartBasedOnBaselineValue = false,
+    this.isSparklineChart = false,
+    this.forceShowBeginningOfXAxis = true,
   }) : super(
           chartStyle,
           datas: datas,
@@ -98,6 +102,7 @@ class ChartPainter extends BaseChartPainter {
           isLine: isLine,
           showYesterdayLastPriceLine: showYesterdayLastPriceLine,
           yesterdayLastPrice: yesterdayLastPrice,
+          forceShowBeginningOfXAxis: forceShowBeginningOfXAxis,
         ) {
     selectPointPaint = Paint()
       // ..isAntiAlias = true
@@ -122,6 +127,8 @@ class ChartPainter extends BaseChartPainter {
       var t = datas![0];
       fixedLength = 4;
     }
+
+    double mLineStrokeWidth = (isSparklineChart ?? false) ? 0.8 : 2.0;
     mMainRenderer = MainRenderer(
       mMainRect,
       mMainMaxValue,
@@ -139,6 +146,7 @@ class ChartPainter extends BaseChartPainter {
       coloriseChartBasedOnBaselineValue,
       datas,
       maDayList,
+      mLineStrokeWidth,
     );
     if (mVolRect != null) {
       mVolRenderer = VolRenderer(mVolRect!, mVolMaxValue, mVolMinValue,
@@ -165,6 +173,7 @@ class ChartPainter extends BaseChartPainter {
       end: Alignment.topCenter,
       colors: chartColors.bgColor,
     );
+
     Rect mainRect =
         Rect.fromLTRB(0, 0, mMainRect.width, mMainRect.height + mTopPadding);
     canvas.drawRect(
@@ -223,8 +232,10 @@ class ChartPainter extends BaseChartPainter {
 
       mMainRenderer.drawChart(
           lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
-      mVolRenderer?.drawChart(
-          lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
+      if (isSparklineChart == false) {
+        mVolRenderer?.drawChart(
+            lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
+      }
       // mSecondaryRenderer?.drawChart(
       //     lastPoint, curPoint, lastX, curX, size, canvas);
     }
@@ -238,6 +249,8 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawVerticalText(Canvas canvas, Size size) {
+    if (isSparklineChart == true) return;
+
     // Paint verticalBg = Paint()
     //   ..color = Colors.white
     //   ..strokeWidth = 1
@@ -251,6 +264,7 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawDate(Canvas canvas, Size size) {
+    if (isSparklineChart == true) return;
     if (datas == null) return;
 
     double columnSpace = size.width / mGridColumns;
@@ -289,6 +303,7 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawCrossLineText(Canvas canvas, Size size) {
+    if (isSparklineChart == true) return;
     var index = calculateSelectedX(selectX);
     KLineEntity point = getItem(index);
     TextSpan span = TextSpan(children: [
@@ -356,6 +371,8 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawText(Canvas canvas, KLineEntity data, double x) {
+    if (isSparklineChart == true) return;
+
     //长按显示按中的数据
     if (isLongPress || (isTapShowInfoDialog && isOnTap)) {
       var index = calculateSelectedX(selectX);
@@ -403,6 +420,8 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawNowPrice(Canvas canvas) {
+    if (isSparklineChart == true) return;
+
     if (!this.showNowPrice) {
       return;
     }
@@ -501,15 +520,17 @@ class ChartPainter extends BaseChartPainter {
         break;
     }
 
-    double top = y - tp.height / 2;
-    canvas.drawRect(
-        Rect.fromLTRB(
-            offsetX - 8, top - 3, offsetX + tp.width + 8, top + tp.height + 3),
-        yesterdayLastPricePaint);
-    tp.paint(canvas, Offset(offsetX, top));
+    if (isSparklineChart == false) {
+      double top = y - tp.height / 2;
+      canvas.drawRect(
+          Rect.fromLTRB(offsetX - 8, top - 3, offsetX + tp.width + 8,
+              top + tp.height + 3),
+          yesterdayLastPricePaint);
+      tp.paint(canvas, Offset(offsetX, top));
+    }
   }
 
-//For TrendLine
+  //For TrendLine
   void drawTrendLines(Canvas canvas, Size size) {
     var index = calculateSelectedX(selectX);
     Paint paintY = Paint()
@@ -567,6 +588,8 @@ class ChartPainter extends BaseChartPainter {
 
   ///画交叉线
   void drawCrossLine(Canvas canvas, Size size) {
+    if (isSparklineChart == true) return;
+
     var index = calculateSelectedX(selectX);
     KLineEntity point = getItem(index);
     Paint dotClosePriceBg = Paint()
@@ -666,7 +689,12 @@ class ChartPainter extends BaseChartPainter {
     if (color == null) {
       color = this.chartColors.defaultTextColor;
     }
-    TextSpan span = TextSpan(text: "$text", style: getTextStyle(color));
+    TextSpan span;
+    if (isSparklineChart == true) {
+      span = TextSpan(text: "", style: getTextStyle(color));
+    } else {
+      span = TextSpan(text: "$text", style: getTextStyle(color));
+    }
     TextPainter tp = TextPainter(text: span, textDirection: TextDirection.ltr);
     tp.layout();
     return tp;

@@ -35,7 +35,7 @@ class VolRenderer extends BaseChartRenderer<VolumeEntity> {
     double bottom = chartRect.bottom;
     if (curPoint.vol != 0) {
       canvas.drawRect(Rect.fromLTRB(curX - r, top, curX + r, bottom),
-          chartPaint..color = this.chartColors.volBarColor.withOpacity(0.05));
+          chartPaint..color = this.chartColors.volBarColor);
     }
 
     // if (lastPoint.MA5Volume != 0) {

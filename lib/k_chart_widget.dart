@@ -63,6 +63,7 @@ class KChartWidget extends StatefulWidget {
   final bool isTrendLine;
   final double xFrontPadding;
 
+  final bool allowZoom;
   final bool isBusy;
 
   KChartWidget(
@@ -99,6 +100,7 @@ class KChartWidget extends StatefulWidget {
     this.isSparklineChart = false,
     this.forceShowBeginningOfXAxis = true,
     this.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice = true,
+    this.allowZoom = true,
   });
 
   @override
@@ -258,18 +260,24 @@ class _KChartWidgetState extends State<KChartWidget>
             _onFling(velocity);
           },
           onHorizontalDragCancel: () => _onDragChanged(false),
-          onScaleStart: (_) {
-            isScale = true;
-          },
-          onScaleUpdate: (details) {
-            // if (isDrag || isLongPress) return;
-            mScaleX = (_lastScale * details.scale).clamp(0.5, 2.2);
-            notifyChanged();
-          },
-          onScaleEnd: (_) {
-            isScale = false;
-            _lastScale = mScaleX;
-          },
+          onScaleStart: widget.allowZoom
+              ? (_) {
+                  isScale = true;
+                }
+              : null,
+          onScaleUpdate: widget.allowZoom
+              ? (details) {
+                  // if (isDrag || isLongPress) return;
+                  mScaleX = (_lastScale * details.scale).clamp(0.5, 2.2);
+                  notifyChanged();
+                }
+              : null,
+          onScaleEnd: widget.allowZoom
+              ? (_) {
+                  isScale = false;
+                  _lastScale = mScaleX;
+                }
+              : null,
           onLongPressStart: (details) {
             isOnTap = false;
             isLongPress = true;

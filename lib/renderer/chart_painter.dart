@@ -214,8 +214,7 @@ class ChartPainter extends BaseChartPainter {
     canvas.save();
     canvas.translate(mTranslateX * scaleX, 0.0);
     canvas.scale(scaleX, 1.0);
-    double value =
-        shouldShowYesterdayLastPriceLine() ? yesterdayLastPrice! : 0.0;
+    double value = hasYesterdayLastPrice() ? yesterdayLastPrice! : 0.0;
     for (int i = mStartIndex; datas != null && i <= mStopIndex; i++) {
       KLineEntity? curPoint = datas?[i];
       if (curPoint == null) continue;
@@ -223,7 +222,7 @@ class ChartPainter extends BaseChartPainter {
       double curX = getX(i);
       double lastX = i == 0 ? curX : getX(i - 1);
       double middleX;
-      if (shouldShowYesterdayLastPriceLine()) {
+      if (hasYesterdayLastPrice()) {
         double priceDiffIndex = ((value - curPoint.close).abs() -
                 (curPoint.close - lastPoint.close).abs())
             .abs();
@@ -478,7 +477,7 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawYesterdayLastPrice(Canvas canvas) {
-    if (!this.shouldShowYesterdayLastPriceLine()) {
+    if (!this.showYesterdayLastPriceLine) {
       return;
     }
 
@@ -612,9 +611,8 @@ class ChartPainter extends BaseChartPainter {
       ..isAntiAlias = true;
     double x = getX(index);
     double y = getMainY(point.close);
-    double yClose = this.shouldShowYesterdayLastPriceLine()
-        ? getMainY(yesterdayLastPrice!)
-        : 0.0;
+    double yClose =
+        this.hasYesterdayLastPrice() ? getMainY(yesterdayLastPrice!) : 0.0;
     double nowPrice = this.showNowPrice && (datas?.isNotEmpty ?? false)
         ? getMainY(datas!.last.close)
         : 0.0;
@@ -652,8 +650,7 @@ class ChartPainter extends BaseChartPainter {
     }
     // canvas.drawLine(
     //     Offset(startX, y), Offset(startX + mWidth / scaleX, y), paintX);
-    double value =
-        this.shouldShowYesterdayLastPriceLine() ? yesterdayLastPrice! : 0.0;
+    double value = this.hasYesterdayLastPrice() ? yesterdayLastPrice! : 0.0;
     Paint paintDotBuySell = Paint()
       ..color = coloriseChartBasedOnBaselineValue
           ? (point.close > value)
@@ -664,7 +661,7 @@ class ChartPainter extends BaseChartPainter {
               : this.chartColors.depthSellColor
       ..strokeWidth = 1
       ..isAntiAlias = true;
-    if (this.shouldShowYesterdayLastPriceLine()) {
+    if (this.hasYesterdayLastPrice()) {
       canvas.drawCircle(Offset(x, yClose), 5.5, dotBg);
       canvas.drawCircle(Offset(x, yClose), 4, yesterdayClosePriceBg);
     }

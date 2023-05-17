@@ -231,7 +231,7 @@ abstract class BaseChartPainter extends CustomPainter {
     mMainMinValue = min(mMainMinValue, minPrice);
 
     if (mMainHighMaxValue < item.high) {
-      if (shouldShowYesterdayLastPriceLine()) {
+      if (hasYesterdayLastPrice()) {
         if (yesterdayLastPrice! > item.high) {
           mMainHighMaxValue = yesterdayLastPrice!;
         } else {
@@ -243,7 +243,7 @@ abstract class BaseChartPainter extends CustomPainter {
       mMainMaxIndex = i;
     }
     if (mMainLowMinValue > item.low) {
-      if (shouldShowYesterdayLastPriceLine()) {
+      if (hasYesterdayLastPrice()) {
         if (yesterdayLastPrice! < item.low) {
           mMainLowMinValue = yesterdayLastPrice!;
         } else if (datas!.last.close < yesterdayLastPrice!) {
@@ -260,19 +260,19 @@ abstract class BaseChartPainter extends CustomPainter {
     if (isLine == true) {
       mMainMaxValue = max(
           mMainMaxValue,
-          shouldShowYesterdayLastPriceLine()
+          hasYesterdayLastPrice()
               ? max(yesterdayLastPrice!, item.close)
               : item.close);
       mMainMinValue = min(
           mMainMinValue,
-          shouldShowYesterdayLastPriceLine()
+          hasYesterdayLastPrice()
               ? min(yesterdayLastPrice!, item.close)
               : item.close);
     }
   }
 
-  bool shouldShowYesterdayLastPriceLine() {
-    return showYesterdayLastPriceLine && yesterdayLastPrice != null;
+  bool hasYesterdayLastPrice() {
+    return yesterdayLastPrice != null;
   }
 
   double _findMaxMA(List<double> a) {

@@ -127,7 +127,6 @@ class ChartPainter extends BaseChartPainter {
   void initChartRenderer() {
     if (datas != null && datas!.isNotEmpty) {
       var t = datas![0];
-      fixedLength = 4;
     }
 
     double mLineStrokeWidth = (isSparklineChart ?? false) ? 0.8 : 2.0;
@@ -311,7 +310,7 @@ class ChartPainter extends BaseChartPainter {
     KLineEntity point = getItem(index);
     TextSpan span = TextSpan(children: [
       TextSpan(
-          text: "Price: ${point.close.toStringAsFixed(4)}  ",
+          text: "Price: ${point.close.toStringAsFixed(fixedLength)}  ",
           style: getTextStyle(this.chartColors.legendTextColor, fontSize: 12)),
       TextSpan(
           text:
@@ -328,7 +327,7 @@ class ChartPainter extends BaseChartPainter {
         (mMainMaxValue - mMainMinValue) * (size.height - 0.16) / size.height;
 
     TextPainter tp = getTextPainter(
-        point.close.toStringAsFixed(4), chartColors.crossTextColor);
+        point.close.toStringAsFixed(fixedLength), chartColors.crossTextColor);
     double textHeight = tp.height;
     double textWidth = tp.width;
     double offsetX = mWidth - tp.width;

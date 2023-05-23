@@ -57,6 +57,7 @@ class ChartPainter extends BaseChartPainter {
   final bool? isSparklineChart;
   final bool? forceShowBeginningOfXAxis;
   final bool? showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice;
+  final double? valueToCompareToColoriseChart;
 
   ChartPainter(
     this.chartStyle,
@@ -88,6 +89,7 @@ class ChartPainter extends BaseChartPainter {
     this.isSparklineChart = false,
     this.forceShowBeginningOfXAxis = true,
     this.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice = true,
+    this.valueToCompareToColoriseChart,
   }) : super(
           chartStyle,
           datas: datas,
@@ -231,11 +233,11 @@ class ChartPainter extends BaseChartPainter {
         middleX = (getX(i) + getX(i + 1)) / 2;
       }
 
-      mMainRenderer.drawChart(
-          lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
+      mMainRenderer.drawChart(lastPoint, curPoint, lastX, curX, middleX, value,
+          valueToCompareToColoriseChart, size, canvas);
       if (isSparklineChart == false) {
-        mVolRenderer?.drawChart(
-            lastPoint, curPoint, lastX, curX, middleX, value, size, canvas);
+        mVolRenderer?.drawChart(lastPoint, curPoint, lastX, curX, middleX,
+            value, valueToCompareToColoriseChart, size, canvas);
       }
       // mSecondaryRenderer?.drawChart(
       //     lastPoint, curPoint, lastX, curX, size, canvas);
@@ -650,7 +652,11 @@ class ChartPainter extends BaseChartPainter {
     }
     // canvas.drawLine(
     //     Offset(startX, y), Offset(startX + mWidth / scaleX, y), paintX);
-    double value = this.hasYesterdayLastPrice() ? yesterdayLastPrice! : 0.0;
+    double value = valueToCompareToColoriseChart != null
+        ? valueToCompareToColoriseChart!
+        : this.hasYesterdayLastPrice()
+            ? yesterdayLastPrice!
+            : 0.0;
     Paint paintDotBuySell = Paint()
       ..color = coloriseChartBasedOnBaselineValue
           ? (point.close > value)

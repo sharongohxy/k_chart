@@ -40,6 +40,7 @@ class SecondaryRenderer extends BaseChartRenderer<MACDEntity> {
       double curX,
       double middleX,
       double? ytdClosePrice,
+      double? valueToCompareToColoriseChart,
       Size size,
       Canvas canvas) {
     switch (state) {

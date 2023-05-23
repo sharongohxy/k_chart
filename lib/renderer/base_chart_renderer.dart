@@ -52,8 +52,16 @@ abstract class BaseChartRenderer<T> {
 
   void drawVerticalText(canvas, textStyle, int gridRows);
 
-  void drawChart(T lastPoint, T curPoint, double lastX, double curX,
-      double middleX, double? ytdClosePrice, Size size, Canvas canvas);
+  void drawChart(
+      T lastPoint,
+      T curPoint,
+      double lastX,
+      double curX,
+      double middleX,
+      double? ytdClosePrice,
+      double? valueToCompareToColoriseChart,
+      Size size,
+      Canvas canvas);
 
   void drawLine(double? lastPrice, double? curPrice, Canvas canvas,
       double lastX, double curX, Color color) {

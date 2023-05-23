@@ -47,10 +47,8 @@ class KChartWidget extends StatefulWidget {
   final bool? isSparklineChart;
   final bool? forceShowBeginningOfXAxis;
   final bool? showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice;
-
   //当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
   final Function(bool)? onLoadMore;
-
   final int fixedLength;
   final List<int> maDayList;
   final int flingTime;
@@ -62,9 +60,9 @@ class KChartWidget extends StatefulWidget {
   final VerticalTextAlignment verticalTextAlignment;
   final bool isTrendLine;
   final double xFrontPadding;
-
   final bool allowZoom;
   final bool isBusy;
+  final double? valueToCompareToColoriseChart;
 
   KChartWidget(
     this.datas,
@@ -101,6 +99,7 @@ class KChartWidget extends StatefulWidget {
     this.forceShowBeginningOfXAxis = true,
     this.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice = true,
     this.allowZoom = true,
+    this.valueToCompareToColoriseChart,
   });
 
   @override
@@ -197,6 +196,7 @@ class _KChartWidgetState extends State<KChartWidget>
       forceShowBeginningOfXAxis: widget.forceShowBeginningOfXAxis,
       showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice:
           widget.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice,
+      valueToCompareToColoriseChart: widget.valueToCompareToColoriseChart,
     );
 
     return LayoutBuilder(

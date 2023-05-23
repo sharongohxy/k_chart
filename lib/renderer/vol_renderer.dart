@@ -28,6 +28,7 @@ class VolRenderer extends BaseChartRenderer<VolumeEntity> {
       double curX,
       double middleX,
       double? ytdClosePrice,
+      double? valueToCompareToColoriseChart,
       Size size,
       Canvas canvas) {
     double r = mVolWidth / 2;

@@ -150,11 +150,20 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       double curX,
       double middleX,
       double? ytdClosePrice,
+      double? valueToCompareToColoriseChart,
       Size size,
       Canvas canvas) {
     if (isLine) {
-      drawPolyline(lastPoint.close, curPoint.close, canvas, lastX, curX,
-          middleX, ytdClosePrice);
+      drawPolyline(
+        lastPoint.close,
+        curPoint.close,
+        canvas,
+        lastX,
+        curX,
+        middleX,
+        ytdClosePrice,
+        valueToCompareToColoriseChart,
+      );
     } else {
       drawCandle(curPoint, canvas, curX);
       if (state == MainState.MA) {
@@ -183,8 +192,16 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
     ..isAntiAlias = true;
 
   //画折线图
-  drawPolyline(double lastPrice, double curPrice, Canvas canvas, double lastX,
-      double curX, double middleX, double? ytdClosePrice) {
+  drawPolyline(
+    double lastPrice,
+    double curPrice,
+    Canvas canvas,
+    double lastX,
+    double curX,
+    double middleX,
+    double? ytdClosePrice,
+    double? valueToCompareToColoriseChart,
+  ) {
 //    drawLine(lastPrice + 100, curPrice + 100, canvas, lastX, curX, ChartColors.kLineColor);
     mLinePath = Path();
     mGreenPartLinePath = Path();
@@ -397,29 +414,29 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
 
       double latestClosePrice = datas!.last.close;
 
-      if (ytdClosePrice != null) {
+      if (valueToCompareToColoriseChart != null) {
         canvas.drawPath(
             mLineFillPath!,
-            latestClosePrice == ytdClosePrice &&
+            latestClosePrice == valueToCompareToColoriseChart &&
                     showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice ==
                         true
                 ? mLineFillPaint
-                : latestClosePrice > ytdClosePrice
+                : latestClosePrice > valueToCompareToColoriseChart
                     ? mGreenLineFillPaint
                     : mRedLineFillPaint);
         mLineFillPath!.reset();
       }
 
-      if (ytdClosePrice != null) {
+      if (valueToCompareToColoriseChart != null) {
         canvas.drawPath(
             mLinePath!,
             mLinePaint
               ..strokeWidth = mLineStrokeWidth
-              ..color = latestClosePrice == ytdClosePrice &&
+              ..color = latestClosePrice == valueToCompareToColoriseChart &&
                       showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice ==
                           true
                   ? chartColors.depthRemainColor
-                  : latestClosePrice > ytdClosePrice
+                  : latestClosePrice > valueToCompareToColoriseChart
                       ? chartColors.depthBuyColor
                       : chartColors.depthSellColor);
         mLinePath!.reset();

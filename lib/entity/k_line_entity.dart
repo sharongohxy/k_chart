@@ -1,3 +1,5 @@
+import 'package:k_chart/entity/chart_fixed_dot_entity.dart';
+
 import '../entity/k_entity.dart';
 
 class KLineEntity extends KEntity {
@@ -10,6 +12,7 @@ class KLineEntity extends KEntity {
   double? change;
   double? ratio;
   int? time;
+  ChartFixedDotEntity? chartFixedDot;
 
   KLineEntity.fromCustom({
     this.amount,
@@ -21,6 +24,7 @@ class KLineEntity extends KEntity {
     required this.high,
     required this.low,
     required this.vol,
+    this.chartFixedDot,
   });
 
   KLineEntity.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,9 @@ class KLineEntity extends KEntity {
     time = tempTime;
     ratio = json['ratio']?.toDouble();
     change = json['change']?.toDouble();
+    chartFixedDot = json['chartFixedDot'] != null
+        ? new ChartFixedDotEntity.fromJson(json['chartFixedDot'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -52,11 +59,14 @@ class KLineEntity extends KEntity {
     data['amount'] = this.amount;
     data['ratio'] = this.ratio;
     data['change'] = this.change;
+    if (this.chartFixedDot != null) {
+      data['chartFixedDot'] = this.chartFixedDot!.toJson();
+    }
     return data;
   }
 
   @override
   String toString() {
-    return 'MarketModel{open: $open, high: $high, low: $low, close: $close, vol: $vol, time: $time, amount: $amount, ratio: $ratio, change: $change}';
+    return 'MarketModel{open: $open, high: $high, low: $low, close: $close, vol: $vol, time: $time, amount: $amount, ratio: $ratio, change: $change, chartFixedDot: $chartFixedDot}';
   }
 }

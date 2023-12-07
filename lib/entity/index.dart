@@ -9,3 +9,4 @@ export 'macd_entity.dart';
 export 'rsi_entity.dart';
 export 'rw_entity.dart';
 export 'volume_entity.dart';
+export 'chart_fixed_dot_entity.dart';

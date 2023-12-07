@@ -1,6 +1,7 @@
 import 'dart:async' show StreamSink;
 
 import 'package:flutter/material.dart';
+import 'package:k_chart/entity/chart_fixed_dot_entity.dart';
 import 'package:k_chart/utils/number_util.dart';
 
 import '../entity/info_window_entity.dart';
@@ -224,6 +225,7 @@ class ChartPainter extends BaseChartPainter {
       double curX = getX(i);
       double lastX = i == 0 ? curX : getX(i - 1);
       double middleX;
+
       if (hasYesterdayLastPrice()) {
         double priceDiffIndex = ((value - curPoint.close).abs() -
                 (curPoint.close - lastPoint.close).abs())
@@ -241,6 +243,19 @@ class ChartPainter extends BaseChartPainter {
       }
       // mSecondaryRenderer?.drawChart(
       //     lastPoint, curPoint, lastX, curX, size, canvas);
+
+      ChartFixedDotEntity? chartFixedDotEntity = curPoint.chartFixedDot;
+      if (chartFixedDotEntity != null) {
+        DateTime curPointDateTime =
+            DateTime.fromMillisecondsSinceEpoch(curPoint.time ?? 0);
+        int curPointMillis = DateTime(curPointDateTime.year,
+                curPointDateTime.month, curPointDateTime.day)
+            .millisecondsSinceEpoch;
+        if (chartFixedDotEntity.millisecond == curPointMillis) {
+          double y = getMainY(curPoint.close);
+          drawDot(canvas, size, curX, y, chartFixedDotEntity);
+        }
+      }
     }
 
     if ((isLongPress == true || (isTapShowInfoDialog && isOnTap))) {
@@ -531,6 +546,29 @@ class ChartPainter extends BaseChartPainter {
           yesterdayLastPricePaint);
       tp.paint(canvas, Offset(offsetX, top));
     }
+  }
+
+  @override
+  void drawDot(Canvas canvas, Size size, double x, double y,
+      ChartFixedDotEntity chartFixedDotEntity) {
+    Paint dotBg = Paint()
+      ..color = this.chartColors.white
+      ..strokeWidth = 1
+      ..isAntiAlias = true;
+    Paint dotValue = Paint()
+      ..color = chartFixedDotEntity.color ?? this.chartColors.depthSellColor
+      ..strokeWidth = 1
+      ..isAntiAlias = true;
+    canvas.drawCircle(
+      Offset(x, y),
+      chartFixedDotEntity.backgroundPointRadius ?? 7.0,
+      dotBg,
+    );
+    canvas.drawCircle(
+      Offset(x, y),
+      chartFixedDotEntity.foregroundPointRadius ?? 5.5,
+      dotValue,
+    );
   }
 
   //For TrendLine

@@ -68,6 +68,11 @@ class ChartColors {
   Color maxColor = Color(0xffffffff);
   Color minColor = Color(0xffffffff);
 
+  // Buy, Sell, Dividend
+  Color buy = Color(0xFF008750);
+  Color sell = Color(0xFFFEB0E29);
+  Color dividend = Color(0xFFBF31EA);
+
   Color getMAColor(int index) {
     switch (index % 3) {
       case 1:

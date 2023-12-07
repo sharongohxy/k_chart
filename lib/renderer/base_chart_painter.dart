@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart'
     show Color, TextStyle, Rect, Canvas, Size, CustomPainter;
+import 'package:k_chart/entity/chart_fixed_dot_entity.dart';
 import 'package:k_chart/utils/date_format_util.dart';
 
 import '../chart_style.dart' show ChartStyle;
@@ -167,6 +168,9 @@ abstract class BaseChartPainter extends CustomPainter {
   void drawNowPrice(Canvas canvas);
 
   void drawYesterdayLastPrice(Canvas canvas);
+
+  void drawDot(Canvas canvas, Size size, double x, double y,
+      ChartFixedDotEntity chartFixedDotEntity);
 
   //画交叉线
   void drawCrossLine(Canvas canvas, Size size);

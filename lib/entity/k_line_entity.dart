@@ -6,7 +6,7 @@ class KLineEntity extends KEntity {
   late double open;
   late double high;
   late double low;
-  late double close;
+  double? close;
   late double vol;
   late double? amount;
   double? change;
@@ -17,7 +17,7 @@ class KLineEntity extends KEntity {
   KLineEntity.fromCustom({
     this.amount,
     required this.open,
-    required this.close,
+    this.close,
     this.change,
     this.ratio,
     required this.time,
@@ -31,7 +31,7 @@ class KLineEntity extends KEntity {
     open = json['open']?.toDouble() ?? 0;
     high = json['high']?.toDouble() ?? 0;
     low = json['low']?.toDouble() ?? 0;
-    close = json['close']?.toDouble() ?? 0;
+    close = json['close']?.toDouble();
     vol = json['vol']?.toDouble() ?? 0;
     amount = json['amount']?.toDouble();
     int? tempTime = json['time']?.toInt();

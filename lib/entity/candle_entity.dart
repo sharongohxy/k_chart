@@ -3,7 +3,7 @@ mixin CandleEntity {
   late double open;
   late double high;
   late double low;
-  late double close;
+  double? close;
 
   List<double>? maValueList;
 

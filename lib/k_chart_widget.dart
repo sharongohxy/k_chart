@@ -63,6 +63,7 @@ class KChartWidget extends StatefulWidget {
   final bool allowZoom;
   final bool isBusy;
   final double? valueToCompareToColoriseChart;
+  final bool showCrossLineVolume;
 
   KChartWidget(
     this.datas,
@@ -100,6 +101,7 @@ class KChartWidget extends StatefulWidget {
     this.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice = true,
     this.allowZoom = true,
     this.valueToCompareToColoriseChart,
+    this.showCrossLineVolume = true,
   });
 
   @override
@@ -197,6 +199,7 @@ class _KChartWidgetState extends State<KChartWidget>
       showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice:
           widget.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice,
       valueToCompareToColoriseChart: widget.valueToCompareToColoriseChart,
+      showCrossLineVolume: widget.showCrossLineVolume,
     );
 
     return LayoutBuilder(
@@ -401,7 +404,7 @@ class _KChartWidgetState extends State<KChartWidget>
               !snapshot.hasData ||
               snapshot.data?.kLineEntity == null) return Container();
           KLineEntity entity = snapshot.data!.kLineEntity;
-          double upDown = entity.change ?? entity.close - entity.open;
+          double upDown = entity.change ?? (entity.close ?? 0) - entity.open;
           double upDownPercent = entity.ratio ?? (upDown / entity.open) * 100;
           final double? entityAmount = entity.amount;
           infos = [
@@ -409,7 +412,7 @@ class _KChartWidgetState extends State<KChartWidget>
             entity.open.toStringAsFixed(widget.fixedLength),
             entity.high.toStringAsFixed(widget.fixedLength),
             entity.low.toStringAsFixed(widget.fixedLength),
-            entity.close.toStringAsFixed(widget.fixedLength),
+            entity.close?.toStringAsFixed(widget.fixedLength) ?? '',
             "${upDown > 0 ? "+" : ""}${upDown.toStringAsFixed(widget.fixedLength)}",
             "${upDownPercent > 0 ? "+" : ''}${upDownPercent.toStringAsFixed(2)}%",
             if (entityAmount != null) entityAmount.toInt().toString()

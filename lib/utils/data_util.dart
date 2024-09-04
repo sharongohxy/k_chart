@@ -25,11 +25,11 @@ class DataUtil {
         entity.maValueList = List<double>.filled(maDayList.length, 0);
 
         for (int j = 0; j < maDayList.length; j++) {
-          ma[j] += closePrice;
+          ma[j] += closePrice ?? 0;
           if (i == maDayList[j] - 1) {
             entity.maValueList?[j] = ma[j] / maDayList[j];
           } else if (i >= maDayList[j]) {
-            ma[j] -= dataList[i - maDayList[j]].close;
+            ma[j] -= dataList[i - maDayList[j]].close ?? 0;
             entity.maValueList?[j] = ma[j] / maDayList[j];
           } else {
             entity.maValueList?[j] = 0;
@@ -46,7 +46,7 @@ class DataUtil {
       if (i >= n) {
         double md = 0;
         for (int j = i - n + 1; j <= i; j++) {
-          double c = dataList[j].close;
+          double c = dataList[j].close ?? 0;
           double m = entity.BOLLMA!;
           double value = c - m;
           md += value * value;
@@ -64,11 +64,11 @@ class DataUtil {
     double ma = 0;
     for (int i = 0; i < dataList.length; i++) {
       KLineEntity entity = dataList[i];
-      ma += entity.close;
+      ma += entity.close ?? 0;
       if (i == day - 1) {
         entity.BOLLMA = ma / day;
       } else if (i >= day) {
-        ma -= dataList[i - day].close;
+        ma -= dataList[i - day].close ?? 0;
         entity.BOLLMA = ma / day;
       } else {
         entity.BOLLMA = null;
@@ -87,13 +87,13 @@ class DataUtil {
       KLineEntity entity = dataList[i];
       final closePrice = entity.close;
       if (i == 0) {
-        ema12 = closePrice;
-        ema26 = closePrice;
+        ema12 = closePrice ?? 0;
+        ema26 = closePrice ?? 0;
       } else {
         // EMA（12） = 前一日EMA（12） X 11/13 + 今日收盘价 X 2/13
-        ema12 = ema12 * 11 / 13 + closePrice * 2 / 13;
+        ema12 = ema12 * 11 / 13 + (closePrice ?? 0) * 2 / 13;
         // EMA（26） = 前一日EMA（26） X 25/27 + 今日收盘价 X 2/27
-        ema26 = ema26 * 25 / 27 + closePrice * 2 / 27;
+        ema26 = ema26 * 25 / 27 + (closePrice ?? 0) * 2 / 27;
       }
       // DIF = EMA（12） - EMA（26） 。
       // 今日DEA = （前一日DEA X 8/10 + 今日DIF X 2/10）
@@ -143,14 +143,16 @@ class DataUtil {
     double rsiMaxEma = 0;
     for (int i = 0; i < dataList.length; i++) {
       KLineEntity entity = dataList[i];
-      final double closePrice = entity.close;
+      final double closePrice = entity.close ?? 0;
       if (i == 0) {
         rsi = 0;
         rsiABSEma = 0;
         rsiMaxEma = 0;
       } else {
-        double rMax = max(0, closePrice - dataList[i - 1].close.toDouble());
-        double rAbs = (closePrice - dataList[i - 1].close.toDouble()).abs();
+        double rMax =
+            max(0, closePrice - (dataList[i - 1].close ?? 0).toDouble());
+        double rAbs =
+            (closePrice - (dataList[i - 1].close ?? 0).toDouble()).abs();
 
         rsiMaxEma = (rMax + (14 - 1) * rsiMaxEma) / 14;
         rsiABSEma = (rAbs + (14 - 1) * rsiABSEma) / 14;
@@ -183,7 +185,7 @@ class DataUtil {
           high = t.high;
         }
       }
-      final cur = entity.close;
+      final cur = entity.close ?? 0;
       var rsv = (cur - low) * 100.0 / (high - low);
       rsv = rsv.isNaN ? 0 : rsv;
       final k = (2 * preK + rsv) / 3.0;
@@ -214,7 +216,7 @@ class DataUtil {
       if (i < 13) {
         entity.r = -10;
       } else {
-        r = -100 * (max14 - dataList[i].close) / (max14 - min14);
+        r = -100 * (max14 - (dataList[i].close ?? 0)) / (max14 - min14);
         if (r.isNaN) {
           entity.r = null;
         } else {
@@ -229,20 +231,24 @@ class DataUtil {
     final count = 14;
     for (int i = 0; i < size; i++) {
       final kline = dataList[i];
-      final tp = (kline.high + kline.low + kline.close) / 3;
+      final tp = (kline.high + kline.low + (kline.close ?? 0)) / 3;
       final start = max(0, i - count + 1);
       var amount = 0.0;
       var len = 0;
       for (int n = start; n <= i; n++) {
-        amount += (dataList[n].high + dataList[n].low + dataList[n].close) / 3;
+        amount +=
+            (dataList[n].high + dataList[n].low + (dataList[n].close ?? 0)) / 3;
         len++;
       }
       final ma = amount / len;
       amount = 0.0;
       for (int n = start; n <= i; n++) {
-        amount +=
-            (ma - (dataList[n].high + dataList[n].low + dataList[n].close) / 3)
-                .abs();
+        amount += (ma -
+                (dataList[n].high +
+                        dataList[n].low +
+                        (dataList[n].close ?? 0)) /
+                    3)
+            .abs();
       }
       final md = amount / len;
       kline.cci = ((tp - ma) / 0.015 / md);

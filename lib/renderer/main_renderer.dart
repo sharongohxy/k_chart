@@ -67,7 +67,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       ..style = PaintingStyle.stroke
       ..strokeWidth = mLineStrokeWidth
       ..color = (datas?.length != 0 && yesterdayLastPrice != null)
-          ? getKLineColor((datas!.last.close - yesterdayLastPrice!))
+          ? getKLineColor(((datas!.last.close ?? 0) - yesterdayLastPrice!))
           : this.chartColors.depthRemainColor;
     // ..color = this.chartColors.kLineColor;
     _contentRect = Rect.fromLTRB(
@@ -193,8 +193,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
 
   //画折线图
   drawPolyline(
-    double lastPrice,
-    double curPrice,
+    double? lastPrice,
+    double? curPrice,
     Canvas canvas,
     double lastX,
     double curX,
@@ -215,7 +215,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
 //          (lastX + curX) / 2, getY(lastPrice), (lastX + curX) / 2, getY(curPrice), curX, getY(curPrice));
 //    }
     if (lastX == curX) lastX = 0; //起点位置填充
-
+    if (lastPrice == null || curPrice == null) return;
     if (coloriseChartBasedOnBaselineValue) {
       mLinePath!.moveTo(lastX, getY(lastPrice));
       if (ytdClosePrice != null) {
@@ -412,7 +412,8 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
       mLineFillPath!.lineTo(curX, chartRect.height + chartRect.top);
       mLineFillPath!.close();
 
-      double latestClosePrice = datas!.last.close;
+      double? latestClosePrice = datas!.last.close;
+      if (latestClosePrice == null) return;
 
       if (valueToCompareToColoriseChart != null) {
         canvas.drawPath(
@@ -504,7 +505,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
     var high = getY(curPoint.high);
     var low = getY(curPoint.low);
     var open = getY(curPoint.open);
-    var close = getY(curPoint.close);
+    var close = getY(curPoint.close ?? 0);
     double r = mCandleWidth / 2;
     double lineR = mCandleLineWidth / 2;
     if (open >= close) {

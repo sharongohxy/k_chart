@@ -59,6 +59,7 @@ class ChartPainter extends BaseChartPainter {
   final bool? forceShowBeginningOfXAxis;
   final bool? showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice;
   final double? valueToCompareToColoriseChart;
+  final bool? showCrossLineVolume;
 
   ChartPainter(
     this.chartStyle,
@@ -91,6 +92,7 @@ class ChartPainter extends BaseChartPainter {
     this.forceShowBeginningOfXAxis = true,
     this.showNeutralColorWhenLivePriceIsSameAsYesterdayClosePrice = true,
     this.valueToCompareToColoriseChart,
+    this.showCrossLineVolume = true,
   }) : super(
           chartStyle,
           datas: datas,
@@ -227,8 +229,8 @@ class ChartPainter extends BaseChartPainter {
       double middleX;
 
       if (hasYesterdayLastPrice()) {
-        double priceDiffIndex = ((value - curPoint.close).abs() -
-                (curPoint.close - lastPoint.close).abs())
+        double priceDiffIndex = ((value - (curPoint.close ?? 0)).abs() -
+                ((curPoint.close ?? 0) - (lastPoint.close ?? 0)).abs())
             .abs();
         middleX = (i - priceDiffIndex) * mPointWidth + mPointWidth / 2;
       } else {
@@ -252,7 +254,7 @@ class ChartPainter extends BaseChartPainter {
                 curPointDateTime.month, curPointDateTime.day)
             .millisecondsSinceEpoch;
         if (chartFixedDotEntity.millisecond == curPointMillis) {
-          double y = getMainY(curPoint.close);
+          double y = getMainY(curPoint.close ?? 0);
           drawDot(canvas, size, curX, y, chartFixedDotEntity);
         }
       }
@@ -324,15 +326,27 @@ class ChartPainter extends BaseChartPainter {
     if (isSparklineChart == true) return;
     var index = calculateSelectedX(selectX);
     KLineEntity point = getItem(index);
-    TextSpan span = TextSpan(children: [
-      TextSpan(
-          text: "Price: ${point.close.toStringAsFixed(fixedLength)}  ",
-          style: getTextStyle(this.chartColors.legendTextColor, fontSize: 12)),
-      TextSpan(
-          text:
-              "Volume: ${formatAmountWithCommas(point.vol.toStringAsFixed(0))}",
-          style: getTextStyle(this.chartColors.legendTextColor, fontSize: 12)),
-    ]);
+    TextSpan span = TextSpan(
+      children: [
+        TextSpan(
+          text: "Price: ${point.close?.toStringAsFixed(fixedLength) ?? ''}  ",
+          style: getTextStyle(
+            this.chartColors.legendTextColor,
+            fontSize: 12,
+          ),
+        ),
+        if (showCrossLineVolume == true) ...[
+          TextSpan(
+            text:
+                "Volume: ${formatAmountWithCommas(point.vol.toStringAsFixed(0))}",
+            style: getTextStyle(
+              this.chartColors.legendTextColor,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ],
+    );
 
     TextPainter legendTp =
         TextPainter(text: span, textDirection: TextDirection.ltr);
@@ -343,11 +357,11 @@ class ChartPainter extends BaseChartPainter {
         (mMainMaxValue - mMainMinValue) * (size.height - 0.16) / size.height;
 
     TextPainter tp = getTextPainter(
-        point.close.toStringAsFixed(fixedLength), chartColors.crossTextColor);
+        point.close?.toStringAsFixed(fixedLength), chartColors.crossTextColor);
     double textHeight = tp.height;
     double textWidth = tp.width;
     double offsetX = mWidth - tp.width;
-    double y = getMainY(point.close);
+    double y = getMainY(point.close ?? 0);
     double top = y - tp.height / 2;
 
     canvas.drawRect(
@@ -448,7 +462,7 @@ class ChartPainter extends BaseChartPainter {
       return;
     }
 
-    double value = datas!.last.close;
+    double value = datas!.last.close ?? 0;
     double y = getMainY(value);
 
     //视图展示区域边界值绘制
@@ -465,7 +479,9 @@ class ChartPainter extends BaseChartPainter {
 
     //再画背景和文本
     TextPainter tp = getTextPainter(
-        value.toStringAsFixed(fixedLength), this.chartColors.black);
+      value.toStringAsFixed(fixedLength),
+      this.chartColors.nowPriceTextColor,
+    );
     double startX = 0;
     final max = mWidth - tp.width;
     final space = 2;
@@ -650,11 +666,11 @@ class ChartPainter extends BaseChartPainter {
       ..strokeWidth = this.chartStyle.hCrossWidth
       ..isAntiAlias = true;
     double x = getX(index);
-    double y = getMainY(point.close);
+    double y = getMainY(point.close ?? 0);
     double yClose =
         this.hasYesterdayLastPrice() ? getMainY(yesterdayLastPrice!) : 0.0;
     double nowPrice = this.showNowPrice && (datas?.isNotEmpty ?? false)
-        ? getMainY(datas!.last.close)
+        ? getMainY(datas!.last.close ?? 0)
         : 0.0;
     // k线图竖线
 
@@ -697,10 +713,10 @@ class ChartPainter extends BaseChartPainter {
             : 0.0;
     Paint paintDotBuySell = Paint()
       ..color = coloriseChartBasedOnBaselineValue
-          ? (point.close > value)
+          ? ((point.close ?? 0) > value)
               ? this.chartColors.depthBuyColor
               : this.chartColors.depthSellColor
-          : datas!.last.close > value
+          : (datas!.last.close ?? 0) > value
               ? this.chartColors.depthBuyColor
               : this.chartColors.depthSellColor
       ..strokeWidth = 1

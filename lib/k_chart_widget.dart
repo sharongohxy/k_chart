@@ -64,6 +64,7 @@ class KChartWidget extends StatefulWidget {
   final bool isBusy;
   final double? valueToCompareToColoriseChart;
   final bool showCrossLineVolume;
+  final Widget? loadingPlaceholder;
 
   KChartWidget(
     this.datas,
@@ -102,6 +103,7 @@ class KChartWidget extends StatefulWidget {
     this.allowZoom = true,
     this.valueToCompareToColoriseChart,
     this.showCrossLineVolume = true,
+    this.loadingPlaceholder,
   });
 
   @override
@@ -156,6 +158,10 @@ class _KChartWidgetState extends State<KChartWidget>
       mScaleX = 1.0;
     }
     if (widget.isBusy) {
+      final loadingPlaceholder = widget.loadingPlaceholder;
+      if (loadingPlaceholder != null) {
+        return loadingPlaceholder;
+      }
       return Center(
         child: Container(
           height: 30,

@@ -357,7 +357,9 @@ class ChartPainter extends BaseChartPainter {
         (mMainMaxValue - mMainMinValue) * (size.height - 0.16) / size.height;
 
     TextPainter tp = getTextPainter(
-        point.close?.toStringAsFixed(fixedLength), chartColors.crossTextColor);
+      (point.close ?? 0).toStringAsFixed(fixedLength),
+      chartColors.crossTextColor,
+    );
     double textHeight = tp.height;
     double textWidth = tp.width;
     double offsetX = mWidth - tp.width;
